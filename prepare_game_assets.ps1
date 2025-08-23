@@ -27,7 +27,7 @@ $kuroToolsDir = Join-Path -Path $scriptRoot -ChildPath "KuroTools v1.3"
 $kuroToolsUrl = "https://github.com/nnguyen259/KuroTools/releases/download/v1.3/KuroTools.v1.3.zip"
 $kuroToolsZipPath = Join-Path -Path $scriptRoot -ChildPath "KuroTools.v1.3.zip"
 
-if (-not (Test-Path -Path $kuroToolsDir -PathType Container) -or -not (Get-ChildItem -Path $kuroToolsDir)) {
+if ((-not (Test-Path -Path $kuroToolsDir -PathType Container)) -or (-not (Get-ChildItem -Path $kuroToolsDir))) {
     Write-Host "KuroTools not found or directory is empty. Downloading and extracting..."
     try {
         Invoke-WebRequest -Uri $kuroToolsUrl -OutFile $kuroToolsZipPath

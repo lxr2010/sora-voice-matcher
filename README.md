@@ -6,6 +6,15 @@
 
 项目通过提取两个版本的游戏脚本，利用文本相似度匹配算法，自动将Evo版的语音文件与重制版相应的对话文本进行关联，最终生成可用于新版游戏的语音文件。
 
+注意：项目施工中，打包功能没有经过完整测试。请有需要的朋友使用匹配结果手动打包。
+```
+--- 匹配完成 ---
+总计 (输入文件): 17274
+处理 (符合条件): 17230
+成功: 16109 (其中向量搜索: 2329)
+失败: 1121
+```
+
 ## 目录介绍
 - `atractool-reloaded`：旧版音频`AT9`格式到新版音频`wav`格式转换工具
 - `FC-Steam`：旧版游戏文件，下设`Trails in the Sky FC`目录，需要将Evo语音包文件放置在这个目录下，具体参考流程步骤1
@@ -192,6 +201,19 @@ uv run match_voices.py --match-battle
     -   **命令**: `uv run match_voices.py -v` 或 `uv run match_voices.py --verbose`
     -   **作用**: 输出详细的日志信息，包括每个被跳过处理的语音条目及其原因，便于调试。
 
+-   **禁用向量搜索**
+    -   **命令**: `uv run match_voices.py --no-similarity-search`
+    -   **作用**: 完全禁用基于向量的相似度搜索，只依赖精确匹配和标准化文本匹配。当您希望匹配结果更严格时可以使用此选项。
+
+-   **自定义相似度阈值**
+    -   **命令**: `uv run match_voices.py --similarity-threshold 0.9`
+    -   **作用**: 设置向量相似度搜索的阈值（默认为 `0.85`）。只有当相似度分数高于此阈值时，才会被视为成功匹配。您可以根据需要调整此值以平衡准确性和召回率。
+
+-   **将匹配失败的语音指向空文件**
+    -   **默认行为**: 脚本会自动将所有未能成功匹配的语音条目指向一个无声的 `EMPTY.wav` 文件。这可以防止游戏在播放这些语音时因找不到文件而出错。
+    -   **禁用命令**: `uv run match_voices.py --no-map-failed-to-empty`
+    -   **作用**: 禁用上述功能。未匹配的语音条目将保留其原始文件名。
+
 这些参数可以组合使用，例如，只匹配特定角色的战斗语音：
 `uv run match_voices.py --character-ids 001 --match-battle-only`
 
@@ -213,9 +235,29 @@ uv run match_voices.py --match-battle
 4.  重新打包生成 `voice.pac` 和 `table_sc.pac`。
 5.  将最终的 `.pac` 文件存放到 `output` 目录下。
 
-打包完成后，您就可以将 `output` 目录下的 `voice.pac` 和 `table_sc.pac` 文件复制到游戏目录中以应用语音补丁。
+### 步骤 6: 应用或恢复补丁
 
-### 步骤 6: 分析与调试 (可选)
+打包完成后，您可以使用 `update_game_files.ps1` 脚本来自动将生成的 `.pac` 文件应用到游戏目录，或从备份中恢复原始文件。
+
+**应用补丁:**
+
+运行以下命令，将 `output` 目录下的 `table_sc.pac` 和 `voice.pac` 复制到游戏的数据目录。脚本会自动备份原始文件（仅首次运行时）。
+
+```powershell
+# 将 "Your\Game\Path" 替换为实际的游戏安装路径
+.\update_game_files.ps1 -GamePath "Your\Game\Path"
+```
+
+**恢复原始文件:**
+
+如果您想移除补丁并恢复游戏的原始文件，请使用 `-Restore` 参数。
+
+```powershell
+# 将 "Your\Game\Path" 替换为实际的游戏安装路径
+.\update_game_files.ps1 -GamePath "Your\Game\Path" -Restore
+```
+
+### 步骤 7: 分析与调试 (可选)
 
 如果您想分析为何某些语音未能匹配，可以运行以下脚本：
 
@@ -233,3 +275,23 @@ uv run match_voices.py --match-battle
 *   `merged_voice_data.json`: **输出文件**。包含所有成功匹配的语音条目。
 *   `unmatched_voice_data.json`: **输出文件**。包含所有未能匹配的语音条目。
 *   `package_assets.ps1`: **打包脚本**。自动化最后一步，将所有资源打包成最终的 `voice.pac` 和 `table_sc.pac` 文件。
+*   `update_game_files.ps1`: **部署脚本**。用于将最终生成的 `.pac` 文件自动复制到游戏目录，并支持从备份中恢复原始文件。
+
+## 致谢
+
+本项目的完成离不开以下优秀开源工具和社区的支持，在此向他们表示诚挚的感谢：
+
+-   **[kuro_mdl_tool](https://github.com/eArmada8/kuro_mdl_tool)** by eArmada8
+    -   **作用**: 提供了处理 Falcom 游戏资源（`.mdl` 文件）的核心功能，是本工具集打包 `.pac` 文件的关键。
+
+-   **[ATRACTool-Reloaded](https://github.com/XyLe-GBP/ATRACTool-Reloaded)** by XyLe-GBP
+    -   **作用**: 用于将索尼的 `.at9` 音频文件高效地转换为通用的 `.wav` 格式，是语音提取流程中不可或缺的一环。
+
+-   **[SoraVoiceScripts](https://github.com/ZhenjianYang/SoraVoiceScripts)** by ZhenjianYang
+    -   **作用**: 提供了原始的《空之轨迹FC Evolution》语音脚本，是进行语音匹配的数据基础。
+
+-   **[Kuro Tools](https://github.com/nnguyen259/KuroTools)** by nnguyen259
+    -   **作用**: 为理解和处理 Falcom 的游戏文件格式提供了宝贵的工具和参考。
+
+-   **[轨迹系列-Cafe](https://trails-game.com/)**
+    -   **作用**: 作为优秀的轨迹系列粉丝社区和资料站，为项目提供了丰富的背景知识和数据参考。
