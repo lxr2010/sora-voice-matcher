@@ -4,6 +4,39 @@
 # Set the root directory for the script
 $scriptRoot = $PSScriptRoot
 
+# --- AUTO-DOWNLOAD ATRACTOOL --- 
+# Define path for the tool and the release zip
+$atractoolDir = Join-Path -Path $scriptRoot -ChildPath "atractool-reloaded"
+$zipUrl = "https://github.com/XyLe-GBP/ATRACTool-Reloaded/releases/download/v1.34.2420.1220/ATRACTool-Rel-Portable.zip"
+$zipPath = Join-Path -Path $scriptRoot -ChildPath "ATRACTool-Rel-Portable.zip"
+
+# Check if the atractool directory is empty or doesn't exist
+if (-not (Test-Path -Path $atractoolDir -PathType Container) -or -not (Get-ChildItem -Path $atractoolDir)) {
+    Write-Host "ATRACTool not found or directory is empty. Downloading and extracting..."
+    
+    try {
+        # Download the zip file
+        Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
+        
+        # Create the directory if it doesn't exist
+        if (-not (Test-Path -Path $atractoolDir -PathType Container)) {
+            New-Item -Path $atractoolDir -ItemType Directory | Out-Null
+        }
+        
+        # Extract the archive
+        Expand-Archive -Path $zipPath -DestinationPath $atractoolDir -Force
+        
+        # Clean up the zip file
+        Remove-Item -Path $zipPath
+        
+        Write-Host "ATRACTool downloaded and extracted successfully."
+    } catch {
+        Write-Error "Failed to download or extract ATRACTool. Please do it manually from $zipUrl"
+        exit 1
+    }
+}
+# --- END OF AUTO-DOWNLOAD ---
+
 # Automatically determine the path to the at9tool executable
 $at9toolPath = Join-Path -Path $scriptRoot -ChildPath "atractool-reloaded\res\psv_at9tool.exe"
 
@@ -13,7 +46,7 @@ $voiceRoot = Join-Path -Path $PSScriptRoot -ChildPath "FC-Steam\Trails in the Sk
 
 # Define source (at9) and destination (wav) directories
 $sourceDir = Join-Path -Path $voiceRoot -ChildPath "at9"
-$destDir = Join-Path -Path $voiceRoot -ChildPath "wav"
+$destDir = Join-Path -Path $PSScriptRoot -ChildPath "voice\wav"
 
 # --- VALIDATION CHECKS ---
 # Check if the at9tool executable exists

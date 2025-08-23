@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import argparse
 import logging
@@ -276,7 +277,45 @@ def main():
     with open(UNMATCHED_OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(unmatched_data, f, ensure_ascii=False, indent=4)
 
-    # 打印统计结果
+    # --- 更新 t_voice.json ---
+    print("\n正在将匹配结果应用到新的 t_voice.json...")
+    
+    # 1. 创建从 new_voice_id 到 old_voice_id 的映射
+    id_to_old_filename_map = {entry['new_voice_id']: "ch" + entry['old_voice_id'][:-1] for entry in matched_data}
+
+    # 2. 重新加载原始 t_voice.json 数据
+    try:
+        with open(NEW_VOICE_FILE, 'r', encoding='utf-8') as f:
+            t_voice_content = json.load(f)
+        
+        # 假设数据结构总是 'data' -> list -> 'data' -> list of entries
+        voice_entries = t_voice_content['data'][0]['data']
+
+        # 3. 遍历并更新文件名
+        updated_count = 0
+        for entry in voice_entries:
+            if entry.get('id') in id_to_old_filename_map:
+                old_filename = id_to_old_filename_map[entry['id']]
+                entry['filename'] = old_filename
+                updated_count += 1
+
+        # 4. 确保 output 目录存在
+        output_dir = 'output'
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # 5. 写入新的 t_voice.json 文件
+        output_t_voice_path = os.path.join(output_dir, 't_voice.json')
+        with open(output_t_voice_path, 'w', encoding='utf-8') as f:
+            json.dump(t_voice_content, f, ensure_ascii=False, indent=4)
+        
+        print(f"成功更新 {updated_count} 个条目。")
+        print(f"新的 t_voice.json 已保存到: {output_t_voice_path}")
+
+    except Exception as e:
+        print(f"错误：更新 t_voice.json 失败: {e}")
+
+    # --- 打印统计结果 ---
     print("\n--- 匹配完成 ---")
     print(f"总计 (输入文件): {total_count}")
     print(f"处理 (符合条件): {processed_count}")
