@@ -1,0 +1,7 @@
+[submodule "kuro_mdl_tool"]
+	path = kuro_mdl_tool
+	url = https://github.com/eArmada8/kuro_mdl_tool.git
+
+[submodule "SoraVoiceScripts"]
+	path = SoraVoiceScripts
+	url = https://github.com/ZhenjianYang/SoraVoiceScripts.git
