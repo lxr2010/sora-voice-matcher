@@ -3,6 +3,7 @@ import os
 import re
 import argparse
 import logging
+from collections import defaultdict
 from sentence_transformers import SentenceTransformer, util
 import torch
 import wave
@@ -58,15 +59,21 @@ def classify_voice_file(filename):
     match = re.match(r'^v(\d{3})_(\w{2})_(\d{4})\.wav$', filename)
     if match:
         char_id, category_code, number = match.groups()
-        category_map = {
-            '00': 'main',
-            'av': 'active_voice',
-            'bv': 'battle_voice'
-        }
+
+        category = 'unknown'
+        if category_code.isdigit():
+            category = 'main'
+        else:
+            category_map = {
+                'av': 'active_voice',
+                'bv': 'battle_voice'
+            }
+            category = category_map.get(category_code, 'unknown')
+
         return {
             'type': 'character_voice',
             'character_id': char_id,
-            'category': category_map.get(category_code, 'unknown'),
+            'category': category,
             'number': number
         }
 
@@ -96,28 +103,31 @@ def classify_voice_file(filename):
 
     return {'type': 'unknown', 'filename': filename}
 
-def find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_list, model, old_embeddings, args):
-    """执行三步匹配策略来查找最佳匹配。"""
+def find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_list, model, old_embeddings, args, used_old_voice_ids, methods):
+    """执行指定方法的匹配策略来查找最佳匹配。"""
     new_text = new_entry['text']
 
     # 1. 精确匹配
-    if new_text in old_data_map:
-        return old_data_map[new_text], 'exact'
+    if 'exact' in methods and new_text in old_data_map:
+        for candidate in old_data_map[new_text]:
+            if candidate['voice_id'] not in used_old_voice_ids:
+                return candidate, 'exact'
 
     # 2. 移除标点后匹配
-    normalized_new_text = normalize_text(new_text)
-    if normalized_new_text and normalized_new_text in old_data_normalized_map:
-        return old_data_normalized_map[normalized_new_text], 'normalized'
+    if 'normalized' in methods and (normalized_new_text := normalize_text(new_text)) and normalized_new_text in old_data_normalized_map:
+        for candidate in old_data_normalized_map[normalized_new_text]:
+            if candidate['voice_id'] not in used_old_voice_ids:
+                return candidate, 'normalized'
 
-    # 3. 如果精确匹配和标准化匹配都失败，并且未禁用相似度搜索，则使用向量相似度进行最终匹配
-    if not args.no_similarity_search:
+    # 3. 向量相似度匹配
+    if 'vector' in methods and not args.no_similarity_search:
         query_embedding = model.encode(new_text, convert_to_tensor=True)
         hits = util.semantic_search(query_embedding, old_embeddings, top_k=1)
         if hits and hits[0][0]['score'] > args.similarity_threshold:
-            best_match = old_data_list[hits[0][0]['corpus_id']]
+            best_match_candidate = old_data_list[hits[0][0]['corpus_id']]
             score = hits[0][0]['score']
             match_type = f'vector_search ({score:.2f})'
-            return best_match, match_type
+            return best_match_candidate, match_type
 
     return None, None
 
@@ -215,78 +225,83 @@ def main():
     old_embeddings = model.encode(old_texts, convert_to_tensor=True)
     print("向量嵌入创建完成。")
 
-    # 为旧数据创建快速查找映射
-    old_data_map = {entry['text']: entry for entry in old_data_list if entry.get('text')}
-    old_data_normalized_map = {normalize_text(entry['text']): entry for entry in old_data_list if entry.get('text')}
+    # 为旧数据创建快速查找映射（一个文本可能对应多个语音）
+    old_data_map = defaultdict(list)
+    old_data_normalized_map = defaultdict(list)
+    for entry in old_data_list:
+        if text := entry.get('text'):
+            # 精确匹配映射
+            old_data_map[text].append(entry)
+            
+            # 标准化文本映射
+            normalized_text = normalize_text(text)
+            if normalized_text:
+                old_data_normalized_map[normalized_text].append(entry)
+
+    # 对候选项列表进行排序，确保优先匹配文件名靠前的语音
+    print("正在对具有相同文本的候选项进行排序...")
+    for text in old_data_map:
+        old_data_map[text].sort(key=lambda e: e.get('voice_id', ''))
+    for text in old_data_normalized_map:
+        old_data_normalized_map[text].sort(key=lambda e: e.get('voice_id', ''))
+    print("排序完成。")
 
     matched_data = []
     unmatched_data = []
+    used_old_voice_ids = set() # 用于跟踪已匹配的旧语音ID
     
     total_count = len(new_data)
     success_count = 0
     processed_count = 0
     vector_search_success_count = 0
 
-    print(f"开始处理 {total_count} 条重制版语音数据...")
-
+    # 筛选出需要处理的条目
+    entries_to_process = []
     for new_entry in new_data:
-        # 必须有文本和文件名才能继续
         if 'text' not in new_entry or not new_entry['text'] or 'filename' not in new_entry:
             continue
 
-        # 对每个条目进行分类
         classification = classify_voice_file(f"{new_entry['filename']}.wav")
-
-        # 根据命令行参数决定是否处理此条目
         category = classification.get('category')
         file_type = classification.get('type')
 
-        # 默认只匹配主线剧情语音 ('main')
         allowed_categories = {'main'}
-
-        if args.match_active:
-            allowed_categories.add('active_voice')
-        if args.match_battle:
-            allowed_categories.add('battle')
-            allowed_categories.add('battle_voice')
-        if args.match_other:
-            allowed_categories.add('unknown')
-        if args.match_sfx:
-            # SFX 是基于 type 而不是 category
-            pass
+        if args.match_active: allowed_categories.add('active_voice')
+        if args.match_battle: allowed_categories.add('battle'); allowed_categories.add('battle_voice')
+        if args.match_other: allowed_categories.add('unknown')
 
         should_process = False
-        reason = f"类别 '{category or file_type}' 未被命令行选项启用"
-
         if file_type == 'sound_effect' and args.match_sfx:
             should_process = True
         elif file_type == 'character_voice' and category in allowed_categories:
             should_process = True
 
-        if not should_process:
-            logging.info(f"跳过 {new_entry['filename']}: {reason}")
-            continue
-
-        # 角色ID过滤（适用于所有通过上述检查的条目）
         if args.character_ids and classification.get('character_id') not in args.character_ids:
-            logging.info(f"跳过 {new_entry['filename']}: 角色ID不匹配 (需要 {args.character_ids}, 实际是 {classification.get('character_id')})")
-            continue
+            should_process = False
 
-        processed_count += 1
-        best_match, match_type = find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_list, model, old_embeddings, args)
+        if should_process:
+            entries_to_process.append(new_entry)
+        else:
+            reason = f"类别 '{category or file_type}' 未被命令行选项启用或角色ID不匹配"
+            logging.info(f"跳过 {new_entry['filename']}: {reason}")
+
+    processed_count = len(entries_to_process)
+    print(f"开始处理 {processed_count} 条符合条件的语音数据...")
+
+    # --- Pass 1: Exact and Normalized Matching ---
+    print("\n--- 第一遍: 执行精确匹配和标准化匹配 ---")
+    remaining_entries_pass2 = []
+    pass1_success_count = 0
+    for new_entry in entries_to_process:
+        best_match, match_type = find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_list, model, old_embeddings, args, used_old_voice_ids, methods=['exact', 'normalized'])
 
         if best_match:
-            success_count += 1
-            if match_type.startswith('vector_search'):
-                vector_search_success_count += 1
-            
-            # 从 new_entry 获取文件名并进行分类
-            new_filename = new_entry.get('filename')
-            classification = classify_voice_file(f"{new_filename}.wav") if new_filename else {'type': 'unknown'}
-
-            merged_entry = {
+            pass1_success_count += 1
+            used_old_voice_ids.add(best_match['voice_id'])
+            classification = classify_voice_file(f"{new_entry.get('filename')}.wav")
+            matched_data.append({
                 'new_voice_id': new_entry.get('id'),
-                'new_filename': new_filename,
+                'new_filename': new_entry.get('filename'),
                 'new_text': new_entry['text'],
                 'old_voice_id': best_match.get('voice_id'),
                 'old_text': best_match.get('text'),
@@ -294,13 +309,40 @@ def main():
                 'source_file': best_match.get('source_file'),
                 'match_type': match_type,
                 'classification': classification
-            }
-            matched_data.append(merged_entry)
+            })
+        else:
+            remaining_entries_pass2.append(new_entry)
+    print(f"第一遍完成: 成功匹配 {pass1_success_count} 条。")
+
+    # --- Pass 2: Vector Similarity Matching ---
+    print("\n--- 第二遍: 对剩余条目执行向量相似度匹配 ---")
+    pass2_success_count = 0
+    for new_entry in remaining_entries_pass2:
+        best_match, match_type = find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_list, model, old_embeddings, args, used_old_voice_ids, methods=['vector'])
+
+        if best_match:
+            pass2_success_count += 1
+            vector_search_success_count += 1
+            classification = classify_voice_file(f"{new_entry.get('filename')}.wav")
+            matched_data.append({
+                'new_voice_id': new_entry.get('id'),
+                'new_filename': new_entry.get('filename'),
+                'new_text': new_entry['text'],
+                'old_voice_id': best_match.get('voice_id'),
+                'old_text': best_match.get('text'),
+                'character_id': best_match.get('character_id'),
+                'source_file': best_match.get('source_file'),
+                'match_type': match_type,
+                'classification': classification
+            })
         else:
             unmatched_data.append({
                 'new_voice_id': new_entry.get('id'),
                 'text': new_entry['text']
             })
+    print(f"第二遍完成: 成功匹配 {pass2_success_count} 条。")
+
+    success_count = pass1_success_count + pass2_success_count
 
     # 写入输出文件
     with open(MERGED_OUTPUT_FILE, 'w', encoding='utf-8') as f:
