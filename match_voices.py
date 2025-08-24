@@ -60,10 +60,8 @@ def classify_voice_file(filename):
         char_id, category_code, number = match.groups()
         category_map = {
             '00': 'main',
-            'av': 'event',
-            'bv': 'battle_extra',
-            'gs': 'scene_gs',
-            'gy': 'scene_gy'
+            'av': 'active_voice',
+            'bv': 'battle_voice'
         }
         return {
             'type': 'character_voice',
@@ -152,19 +150,24 @@ def main():
         help='只匹配指定的角色ID（可提供多个，以空格分隔）。'
     )
     parser.add_argument(
-        '--match-battle-only',
+        '--match-active',
         action='store_true',
-        help='只匹配战斗语音（默认不处理）。'
+        help='匹配主动语音 (av category)。默认不匹配。'
     )
     parser.add_argument(
         '--match-battle',
         action='store_true',
-        help='匹配战斗语音（默认不处理）。'
+        help='匹配战斗语音 (b, bv category)。默认不匹配。'
+    )
+    parser.add_argument(
+        '--match-other',
+        action='store_true',
+        help='匹配分类为 unknown 的语音。默认不匹配。'
     )
     parser.add_argument(
         '--match-sfx',
         action='store_true',
-        help='包括音效文件（默认不处理）。'
+        help='匹配音效文件 (v_se_*)。默认不匹配。'
     )
     parser.add_argument(
         '-v', '--verbose',
@@ -235,48 +238,30 @@ def main():
         classification = classify_voice_file(f"{new_entry['filename']}.wav")
 
         # 根据命令行参数决定是否处理此条目
+        category = classification.get('category')
+        file_type = classification.get('type')
+
+        # 默认只匹配主线剧情语音 ('main')
+        allowed_categories = {'main'}
+
+        if args.match_active:
+            allowed_categories.add('active_voice')
+        if args.match_battle:
+            allowed_categories.add('battle')
+            allowed_categories.add('battle_voice')
+        if args.match_other:
+            allowed_categories.add('unknown')
+        if args.match_sfx:
+            # SFX 是基于 type 而不是 category
+            pass
+
         should_process = False
-        reason = "未知类型"
-        is_battle = classification.get('category') == 'battle'
-        is_sfx = classification['type'] == 'sound_effect'
-        is_character_voice = classification['type'] == 'character_voice'
+        reason = f"类别 '{category or file_type}' 未被命令行选项启用"
 
-        any_filter_provided = any([
-            args.match_battle,
-            args.match_sfx,
-            args.match_battle_only,
-            args.character_ids
-        ])
-
-        if not any_filter_provided:
-            if is_character_voice:
-                should_process = True
-            else:
-                reason = "非角色语音（默认模式）"
-        elif args.match_battle_only:
-            if is_battle:
-                should_process = True
-            else:
-                reason = "非战斗语音（--match-battle-only 模式）"
-        else:
-            # 默认处理非战斗角色语音
-            if is_character_voice and not is_battle:
-                should_process = True
-            # 如果 --match-battle 开启，额外处理战斗语音
-            if is_battle and args.match_battle:
-                should_process = True
-            # 如果 --match-sfx 开启，额外处理音效
-            if is_sfx and args.match_sfx:
-                should_process = True
-            
-            # 如果不满足任何处理条件，确定跳过原因
-            if not should_process:
-                if is_battle:
-                    reason = "战斗语音（默认跳过）"
-                elif is_sfx:
-                    reason = "音效（默认跳过）"
-                else:
-                    reason = "不满足任何匹配条件"
+        if file_type == 'sound_effect' and args.match_sfx:
+            should_process = True
+        elif file_type == 'character_voice' and category in allowed_categories:
+            should_process = True
 
         if not should_process:
             logging.info(f"跳过 {new_entry['filename']}: {reason}")

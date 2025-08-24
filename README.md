@@ -140,14 +140,14 @@ git submodule update --init kuro_mdl_tool
 这是最关键的一步。运行 `match_voices.py`，它会加载新版游戏的语音表 (`KuroTools v1.3/scripts&tables/t_voice.json`) 和上一步生成的 `voice_data.json`，然后进行文本匹配。
 
 ```bash
-# 运行基础匹配（匹配所有角色的语音，但是不匹配战斗语音，也不匹配音效）
+# 运行基础匹配（默认只匹配主线剧情语音）
 uv run match_voices.py
 
 # (可选) 只匹配特定角色的语音
 uv run match_voices.py --character-ids 001 002
 
-# (可选) 包含战斗语音
-uv run match_voices.py --match-battle
+# (可选) 同时匹配主线、战斗和主动语音
+uv run match_voices.py --match-battle --match-active
 ```
 
 此脚本会生成三个主要文件：
@@ -178,24 +178,28 @@ uv run match_voices.py --match-battle
 
 -   **基础用法** (默认行为)
     -   **命令**: `uv run match_voices.py`
-    -   **作用**: 匹配所有角色的**非战斗**、**非音效**类语音。这是最常用的模式。
+    -   **作用**: 仅匹配主线剧情相关的语音 (`00` category)。这是最基础的模式，不包含任何战斗、主动或未知语音。
 
 -   **按角色ID过滤**
     -   **命令**: `uv run match_voices.py --character-ids <ID1> <ID2> ...`
     -   **示例**: `uv run match_voices.py --character-ids 001 002`
-    -   **作用**: 只处理指定角色ID的语音。
+    -   **作用**: 只处理指定角色ID的语音。此过滤器可与其它选项组合使用。
 
--   **包含战斗语音**
+-   **匹配主动语音**
+    -   **命令**: `uv run match_voices.py --match-active`
+    -   **作用**: 在默认匹配的基础上，额外包含主动语音 (`av` category)。
+
+-   **匹配战斗语音**
     -   **命令**: `uv run match_voices.py --match-battle`
-    -   **作用**: 在默认匹配的基础上，额外包含所有角色的战斗语音。
+    -   **作用**: 在默认匹配的基础上，额外包含所有角色的战斗语音 (`b` 和 `bv` category)。
 
--   **仅匹配战斗语音**
-    -   **命令**: `uv run match_voices.py --match-battle-only`
-    -   **作用**: 忽略所有其他类型的语音，只对战斗语音进行匹配。
+-   **匹配其他未知语音**
+    -   **命令**: `uv run match_voices.py --match-other`
+    -   **作用**: 匹配所有分类为 `unknown` 的语音。
 
--   **包含音效**
+-   **匹配音效**
     -   **命令**: `uv run match_voices.py --match-sfx`
-    -   **作用**: 在默认匹配的基础上，额外包含音效文件。
+    -   **作用**: 匹配所有音效文件 (`v_se_*`)。
 
 -   **详细日志**
     -   **命令**: `uv run match_voices.py -v` 或 `uv run match_voices.py --verbose`
@@ -214,8 +218,8 @@ uv run match_voices.py --match-battle
     -   **禁用命令**: `uv run match_voices.py --no-map-failed-to-empty`
     -   **作用**: 禁用上述功能。未匹配的语音条目将保留其原始文件名。
 
-这些参数可以组合使用，例如，只匹配特定角色的战斗语音：
-`uv run match_voices.py --character-ids 001 --match-battle-only`
+这些参数可以组合使用。例如，要匹配艾丝蒂尔（ID 001）和约修亚（ID 002）的主线、战斗和主动语音，可以使用以下命令：
+`uv run match_voices.py --character-ids 001 002 --match-battle --match-active`
 
 
 ### 步骤 5: 打包最终资源
