@@ -9,6 +9,31 @@ import torch
 import wave
 import struct
 from pathlib import Path
+import sys
+import io
+
+# --- Logging Setup ---
+# Create logger
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG) # Set lowest level to capture all messages
+
+# Create file handler which logs even debug messages
+fh = logging.FileHandler('match_voice.log', mode='w', encoding='utf-8')
+fh.setLevel(logging.DEBUG)
+
+# Create console handler with a higher log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# Create formatter and add it to the handlers
+file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_formatter = logging.Formatter('%(message)s')
+fh.setFormatter(file_formatter)
+ch.setFormatter(console_formatter)
+
+# Add the handlers to the logger
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 
 def create_empty_wav_file(path):
@@ -121,7 +146,8 @@ def find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_l
 
     # 3. 向量相似度匹配
     if 'vector' in methods and not args.no_similarity_search:
-        query_embedding = model.encode(new_text, convert_to_tensor=True)
+        contextual_new_text = f"{new_entry.get('context_prev', '')} {new_text} {new_entry.get('context_next', '')}".strip()
+        query_embedding = model.encode(contextual_new_text, convert_to_tensor=True)
         hits = util.semantic_search(query_embedding, old_embeddings, top_k=1)
         if hits and hits[0][0]['score'] > args.similarity_threshold:
             best_match_candidate = old_data_list[hits[0][0]['corpus_id']]
@@ -189,17 +215,11 @@ def main():
     parser.add_argument('--no-map-failed-to-empty', dest='map_failed_to_empty', action='store_false', help='禁用“将匹配失败的语音指向空WAV文件”的功能（默认开启）。')
     args = parser.parse_args()
 
-    # 根据 --verbose 参数配置日志记录
-    if args.verbose:
-        logging.basicConfig(level=logging.INFO, format='%(message)s')
-    else:
-        logging.basicConfig(level=logging.WARNING, format='%(levelname)s: %(message)s')
-
     # 如果启用了映射到空文件功能，则提前创建该文件
     if args.map_failed_to_empty:
         empty_wav_path = Path('voice/wav/EMPTY.wav')
         create_empty_wav_file(empty_wav_path)
-        logging.info(f"已创建或更新统一的空WAV文件: {empty_wav_path}")
+        logger.info(f"已创建或更新统一的空WAV文件: {empty_wav_path}")
 
     try:
         with open(NEW_VOICE_FILE, 'r', encoding='utf-8') as f:
@@ -207,23 +227,62 @@ def main():
         with open(OLD_VOICE_FILE, 'r', encoding='utf-8') as f:
             old_data_list = json.load(f)
     except FileNotFoundError as e:
-        print(f"错误：找不到文件 {e.filename}")
+        logger.error(f"错误：找不到文件 {e.filename}")
         return
     except (json.JSONDecodeError, KeyError, IndexError) as e:
-        print(f"错误：解析JSON文件或找不到键时出错: {e}")
+        logger.error(f"错误：解析JSON文件或找不到键时出错: {e}")
         return
+
+    # 为新语音数据添加上下文
+    logger.info("正在为新语音数据添加上下文...")
+    # 根据 'id' 字段排序以确保对话顺序
+    new_data.sort(key=lambda x: x.get('id', ''))
+    for i, entry in enumerate(new_data):
+        # 添加上一句上下文
+        if i > 0:
+            entry['context_prev'] = new_data[i-1].get('text', '')
+        else:
+            entry['context_prev'] = ""
+            
+        # 添加下一句上下文
+        if i < len(new_data) - 1:
+            entry['context_next'] = new_data[i+1].get('text', '')
+        else:
+            entry['context_next'] = ""
+    logger.info("上下文添加完成。")
+
+    # 为旧语音数据添加上下文
+    logger.info("正在为旧语音数据添加上下文...")
+    # 按源文件和全局ID排序以确保对话顺序
+    old_data_list.sort(key=lambda x: (x.get('source_file', ''), x.get('global_id', '')))
+    for i, entry in enumerate(old_data_list):
+        # 添加上一句上下文，仅当在同一源文件内时
+        if i > 0 and old_data_list[i-1].get('source_file') == entry.get('source_file'):
+            entry['context_prev'] = old_data_list[i-1].get('text', '')
+        else:
+            entry['context_prev'] = ""
+        
+        # 添加下一句上下文，仅当在同一源文件内时
+        if i < len(old_data_list) - 1 and old_data_list[i+1].get('source_file') == entry.get('source_file'):
+            entry['context_next'] = old_data_list[i+1].get('text', '')
+        else:
+            entry['context_next'] = ""
+    logger.info("旧数据上下文添加完成。")
 
     # 加载预训练的 sentence-transformer 模型
     # 'paraphrase-multilingual-MiniLM-L12-v2' 是一个性能优秀的多语言模型
-    print("正在加载文本向量化模型...")
+    logger.info("正在加载文本向量化模型...")
     model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-    print("模型加载完成。")
+    logger.info("模型加载完成。")
 
     # 为旧数据创建向量嵌入
-    print("正在为旧语音数据创建向量嵌入...")
-    old_texts = [entry.get('text', '') for entry in old_data_list]
-    old_embeddings = model.encode(old_texts, convert_to_tensor=True)
-    print("向量嵌入创建完成。")
+    logger.info("正在为旧语音数据创建上下文向量嵌入...")
+    old_contextual_texts = [
+        f"{entry.get('context_prev', '')} {entry.get('text', '')} {entry.get('context_next', '')}".strip()
+        for entry in old_data_list
+    ]
+    old_embeddings = model.encode(old_contextual_texts, convert_to_tensor=True)
+    logger.info("向量嵌入创建完成。")
 
     # 为旧数据创建快速查找映射（一个文本可能对应多个语音）
     old_data_map = defaultdict(list)
@@ -239,19 +298,18 @@ def main():
                 old_data_normalized_map[normalized_text].append(entry)
 
     # 对候选项列表进行排序，确保优先匹配文件名靠前的语音
-    print("正在对具有相同文本的候选项进行排序...")
+    logger.info("正在对具有相同文本的候选项进行排序...")
     for text in old_data_map:
         old_data_map[text].sort(key=lambda e: e.get('voice_id', ''))
     for text in old_data_normalized_map:
         old_data_normalized_map[text].sort(key=lambda e: e.get('voice_id', ''))
-    print("排序完成。")
+    logger.info("排序完成。")
 
     matched_data = []
     unmatched_data = []
     used_old_voice_ids = set() # 用于跟踪已匹配的旧语音ID
     
     total_count = len(new_data)
-    success_count = 0
     processed_count = 0
     vector_search_success_count = 0
 
@@ -283,13 +341,13 @@ def main():
             entries_to_process.append(new_entry)
         else:
             reason = f"类别 '{category or file_type}' 未被命令行选项启用或角色ID不匹配"
-            logging.info(f"跳过 {new_entry['filename']}: {reason}")
+            logger.info(f"跳过 {new_entry['filename']}: {reason}")
 
     processed_count = len(entries_to_process)
-    print(f"开始处理 {processed_count} 条符合条件的语音数据...")
+    logger.info(f"开始处理 {processed_count} 条符合条件的语音数据...")
 
     # --- Pass 1: Exact and Normalized Matching ---
-    print("\n--- 第一遍: 执行精确匹配和标准化匹配 ---")
+    logger.info("\n--- 第一遍: 执行精确匹配和标准化匹配 ---")
     remaining_entries_pass2 = []
     pass1_success_count = 0
     for new_entry in entries_to_process:
@@ -304,6 +362,7 @@ def main():
                 'new_filename': new_entry.get('filename'),
                 'new_text': new_entry['text'],
                 'old_voice_id': best_match.get('voice_id'),
+                'old_global_id': best_match.get('global_id'),
                 'old_text': best_match.get('text'),
                 'character_id': best_match.get('character_id'),
                 'source_file': best_match.get('source_file'),
@@ -312,16 +371,133 @@ def main():
             })
         else:
             remaining_entries_pass2.append(new_entry)
-    print(f"第一遍完成: 成功匹配 {pass1_success_count} 条。")
+    logger.info(f"第一遍完成: 成功匹配 {pass1_success_count} 条。")
 
-    # --- Pass 2: Vector Similarity Matching ---
-    print("\n--- 第二遍: 对剩余条目执行向量相似度匹配 ---")
+    # --- Context Verification Pass ---
+    logger.info("\n--- 上下文验证: 检查已匹配项的上下文一致性 ---")
+    new_id_to_match_map = {m['new_voice_id']: m for m in matched_data}
+    new_id_to_new_entry_map = {e['id']: e for e in new_data} # Assumes new_data is sorted by id
+
+    confirmed_matches = []
+    entries_for_rematch = []
+    reverted_count = 0
+
+    for match in matched_data:
+        new_id = match['new_voice_id']
+        old_global_id = match.get('old_global_id')
+
+        if old_global_id is None: # Should not happen with recent changes, but for safety
+            confirmed_matches.append(match)
+            continue
+
+        # --- Check previous voice context ---
+        prev_new_entry = new_id_to_new_entry_map.get(new_id - 1)
+        prev_match = new_id_to_match_map.get(new_id - 1) if prev_new_entry else None
+        
+        # Context is OK if: 1. There is no previous entry. 2. The previous entry was matched correctly.
+        prev_context_ok = (prev_new_entry is None) or \
+                          (prev_match and (
+                              prev_match.get('source_file') != match.get('source_file') or \
+                              prev_match.get('old_global_id') == old_global_id - 1
+                          ))
+
+        # --- Check next voice context ---
+        next_new_entry = new_id_to_new_entry_map.get(new_id + 1)
+        next_match = new_id_to_match_map.get(new_id + 1) if next_new_entry else None
+
+        # Context is OK if: 1. There is no next entry. 2. The next entry was matched correctly.
+        next_context_ok = (next_new_entry is None) or \
+                          (next_match and (
+                              next_match.get('source_file') != match.get('source_file') or \
+                              next_match.get('old_global_id') == old_global_id + 1
+                          ))
+
+        if prev_context_ok and next_context_ok:
+            confirmed_matches.append(match)
+        else:
+            # 仅当候选项不唯一（0或>=2）时，才考虑撤销
+            new_text = match['new_text']
+            normalized_new_text = normalize_text(new_text)
+            # 检查精确匹配和标准化匹配的候选项数量
+            num_candidates = len(old_data_map.get(new_text, [])) or len(old_data_normalized_map.get(normalized_new_text, []))
+
+            if num_candidates == 1:
+                # 如果只有一个候选项，我们相信这个匹配是正确的，不撤销
+                confirmed_matches.append(match)
+                logger.debug(f"  - 保留匹配 (唯一候选项): New ID {match['new_voice_id']} ({match['new_text']})")
+            else:
+                # Revert match and send for re-matching
+                logger.debug(f"  - 撤销匹配: New ID {match['new_voice_id']} ({match['new_text']}) <-> Old ID {match['old_voice_id']} ({match['old_text']})")
+                reverted_count += 1
+                original_new_entry = new_id_to_new_entry_map.get(new_id)
+                if original_new_entry:
+                    entries_for_rematch.append(original_new_entry)
+                # Also remove the used old voice ID to make it available again
+                used_old_voice_ids.remove(match['old_voice_id'])
+
+    logger.info(f"上下文验证完成: {reverted_count} 条因上下文不一致被撤销，将重新匹配。")
+    matched_data = confirmed_matches
+    # Combine Pass 1 failures with reverted entries for the next passes
+    remaining_entries_pass2.extend(entries_for_rematch)
+
+    # --- Pass 2: Contextual Matching for Ambiguous Entries ---
+    logger.info("\n--- 第二遍: 对剩余条目中存在歧义的部分执行上下文精确匹配 ---")
     pass2_success_count = 0
+    remaining_entries_pass3 = []  # Entries that will go to vector search
     for new_entry in remaining_entries_pass2:
+        new_text = new_entry.get('text', '')
+        
+        # Find potential candidates from exact text match
+        candidates = old_data_map.get(new_text, [])
+        
+        # Only perform context match if there's ambiguity (multiple candidates)
+        if new_text and len(candidates) > 1:
+            found_context_match = False
+            for candidate in candidates:
+                if candidate['voice_id'] in used_old_voice_ids:
+                    continue
+
+                # Triplet check: current text (already matches), previous, and next context
+                if new_entry.get('context_prev', '') == candidate.get('context_prev', '') and \
+                   new_entry.get('context_next', '') == candidate.get('context_next', ''):
+                    
+                    pass2_success_count += 1
+                    logger.debug(f"  - 上下文匹配成功: New ID {new_entry['id']}")
+                    logger.debug(f"    - New Context: ['{new_entry.get('context_prev', '')}', '{new_entry.get('text', '')}', '{new_entry.get('context_next', '')}']")
+                    logger.debug(f"    - Old Context: ['{candidate.get('context_prev', '')}', '{candidate.get('text', '')}', '{candidate.get('context_next', '')}']")
+
+                    used_old_voice_ids.add(candidate['voice_id'])
+                    classification = classify_voice_file(f"{new_entry.get('filename')}.wav")
+                    matched_data.append({
+                        'new_voice_id': new_entry.get('id'),
+                        'new_filename': new_entry.get('filename'),
+                        'new_text': new_entry['text'],
+                        'old_voice_id': candidate.get('voice_id'),
+                        'old_global_id': candidate.get('global_id'),
+                        'old_text': candidate.get('text'),
+                        'character_id': candidate.get('character_id'),
+                        'source_file': candidate.get('source_file'),
+                        'match_type': 'context',
+                        'classification': classification
+                    })
+                    found_context_match = True
+                    break # Found a match, no need to check other candidates
+            
+            if not found_context_match:
+                remaining_entries_pass3.append(new_entry)
+        else:
+            # If no ambiguity, pass to the next stage
+            remaining_entries_pass3.append(new_entry)
+    logger.info(f"第二遍完成: 成功匹配 {pass2_success_count} 条。")
+
+    # --- Pass 3: Vector Similarity Matching ---
+    logger.info("\n--- 第三遍: 对剩余条目执行向量相似度匹配 ---")
+    pass3_success_count = 0
+    for new_entry in remaining_entries_pass3:
         best_match, match_type = find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_list, model, old_embeddings, args, used_old_voice_ids, methods=['vector'])
 
         if best_match:
-            pass2_success_count += 1
+            pass3_success_count += 1
             vector_search_success_count += 1
             classification = classify_voice_file(f"{new_entry.get('filename')}.wav")
             matched_data.append({
@@ -329,6 +505,7 @@ def main():
                 'new_filename': new_entry.get('filename'),
                 'new_text': new_entry['text'],
                 'old_voice_id': best_match.get('voice_id'),
+                'old_global_id': best_match.get('global_id'),
                 'old_text': best_match.get('text'),
                 'character_id': best_match.get('character_id'),
                 'source_file': best_match.get('source_file'),
@@ -340,9 +517,13 @@ def main():
                 'new_voice_id': new_entry.get('id'),
                 'text': new_entry['text']
             })
-    print(f"第二遍完成: 成功匹配 {pass2_success_count} 条。")
+    logger.info(f"第三遍完成: 成功匹配 {pass3_success_count} 条。")
 
-    success_count = pass1_success_count + pass2_success_count
+    # 最终成功数就是 matched_data 列表的长度
+    success_count = len(matched_data)
+
+    # 在写入前按 new_voice_id 排序
+    matched_data.sort(key=lambda x: x['new_voice_id'])
 
     # 写入输出文件
     with open(MERGED_OUTPUT_FILE, 'w', encoding='utf-8') as f:
@@ -352,7 +533,7 @@ def main():
         json.dump(unmatched_data, f, ensure_ascii=False, indent=4)
 
     # --- 更新 t_voice.json ---
-    print("\n正在将匹配结果应用到新的 t_voice.json...")
+    logger.info("\n正在将匹配结果应用到新的 t_voice.json...")
     
     # 1. 创建已匹配和未匹配的ID查找集
     id_to_old_filename_map = {entry['new_voice_id']: "ch" + entry['old_voice_id'][:-1] for entry in matched_data}
@@ -378,9 +559,9 @@ def main():
                 entry['filename'] = 'EMPTY'
                 unmatched_mapped_count += 1
 
-        print(f"\n成功更新 {updated_count} 个已匹配的语音条目。")
+        logger.info(f"\n成功更新 {updated_count} 个已匹配的语音条目。")
         if args.map_failed_to_empty:
-            print(f"已将 {unmatched_mapped_count} 个未匹配的语音条目指向 EMPTY.wav。")
+            logger.info(f"已将 {unmatched_mapped_count} 个未匹配的语音条目指向 EMPTY.wav。")
 
         # 4. 确保 output 目录存在
         output_dir = 'output'
@@ -392,20 +573,20 @@ def main():
         with open(output_t_voice_path, 'w', encoding='utf-8') as f:
             json.dump(t_voice_content, f, ensure_ascii=False, indent=4)
         
-        print(f"成功更新 {updated_count} 个条目。")
-        print(f"新的 t_voice.json 已保存到: {output_t_voice_path}")
+        logger.info(f"成功更新 {updated_count} 个条目。")
+        logger.info(f"新的 t_voice.json 已保存到: {output_t_voice_path}")
 
     except Exception as e:
-        print(f"错误：更新 t_voice.json 失败: {e}")
+        logger.error(f"错误：更新 t_voice.json 失败: {e}")
 
     # --- 打印统计结果 ---
-    print("\n--- 匹配完成 ---")
-    print(f"总计 (输入文件): {total_count}")
-    print(f"处理 (符合条件): {processed_count}")
-    print(f"成功: {success_count} (其中向量搜索: {vector_search_success_count})")
-    print(f"失败: {processed_count - success_count}")
-    print(f"成功匹配的数据已保存到: {MERGED_OUTPUT_FILE}")
-    print(f"未匹配的数据已保存到: {UNMATCHED_OUTPUT_FILE}")
+    logger.info("\n--- 匹配完成 ---")
+    logger.info(f"总计 (输入文件): {total_count}")
+    logger.info(f"处理 (符合条件): {processed_count}")
+    logger.info(f"成功: {success_count} (其中向量搜索: {vector_search_success_count})")
+    logger.info(f"失败: {processed_count - success_count}")
+    logger.info(f"成功匹配的数据已保存到: {MERGED_OUTPUT_FILE}")
+    logger.info(f"未匹配的数据已保存到: {UNMATCHED_OUTPUT_FILE}")
 
 if __name__ == '__main__':
     main()

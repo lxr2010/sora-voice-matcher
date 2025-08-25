@@ -110,13 +110,32 @@ def main():
 
     print(f"Scanning files in '{source_folder}'...")
 
-    for filename in os.listdir(source_folder):
+    # 文件名排序，确保处理顺序稳定
+    file_list = sorted(os.listdir(source_folder))
+    for filename in file_list:
         if filename.lower().endswith('.txt'):
             file_path = os.path.join(source_folder, filename)
             print(f"Processing {filename}...")
             extracted_data = parse_script_file(file_path)
             if extracted_data:
                 all_voice_data.extend(extracted_data)
+
+    # 添加全局ID和上下文
+    print("\nAdding global IDs and context...")
+    for i, entry in enumerate(all_voice_data):
+        entry['global_id'] = i
+        
+        # 添加上一句上下文
+        if i > 0:
+            entry['context_prev'] = all_voice_data[i-1]['text']
+        else:
+            entry['context_prev'] = ""
+            
+        # 添加下一句上下文
+        if i < len(all_voice_data) - 1:
+            entry['context_next'] = all_voice_data[i+1]['text']
+        else:
+            entry['context_next'] = ""
 
     # 保存到JSON文件
     output_path = os.path.abspath(OUTPUT_FILE)
