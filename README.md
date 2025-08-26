@@ -299,3 +299,273 @@ uv run match_voices.py --match-battle --match-active
 
 -   **[轨迹系列-Cafe](https://trails-game.com/)**
     -   **作用**: 作为优秀的轨迹系列粉丝社区和资料站，为项目提供了丰富的背景知识和数据参考。
+
+---
+
+# Sora Voice Extractor & Matcher (English)
+
+## Project Introduction
+
+This project aims to match and replace the voice pack from *The Legend of Heroes: Trails in the Sky FC Evolution* with the remastered version, allowing players to experience the full voice acting of the Evo version in the new game.
+
+The project works by extracting game scripts from both versions and using text similarity matching algorithms to automatically associate the Evo voice files with the corresponding dialogue text in the remastered version. Finally, it generates the necessary files to be used in the new game.
+
+**Note**: This project is under construction, and the packaging functionality has not been fully tested. Please use the matching results to package the files manually if needed.
+
+```
+--- Matching Complete ---
+Total (Input Files): 17274
+Processed (Eligible): 13686
+Success: 13594 (Vector Search: 405)
+Failed: 92
+```
+
+## Directory Structure
+- `atractool-reloaded`: Tool for converting the old `AT9` audio format to the new `wav` format.
+- `FC-Steam`: Directory for the old game files. Place the Evo voice pack under `FC-Steam\Trails in the Sky FC\` as described in Step 1.
+- `kuro_mdl_tool`: Tool for unpacking and repacking Falcom engine PAC files, used for the remastered game.
+- `KuroTools v1.3`: Falcom engine editing tools, used for editing the remastered game's TBL files.
+- `SoraVoiceScripts`: Voice scripts from the original game, used to extract dialogue text.
+- `voice`: Directory for the old game's voice files, used to store the `WAV` audio for packaging.
+- `output/`: Output directory. Contains all final generated files, including the updated `t_voice.json`, `t_voice.tbl`, and the final `.pac` files.
+
+## Environment Setup
+
+This project requires Python 3.10 or higher.
+
+It is recommended to use `uv` to manage the virtual environment and dependencies for faster resolution and installation.
+
+### Method 1: Using uv (Recommended)
+
+1.  **Install uv**:
+
+    If you don't have `uv` installed, run the appropriate command for your OS:
+    ```shell
+    # Windows (Powershell)
+    irm https://astral.sh/uv/install.ps1 | iex
+
+    # macOS / Linux
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
+
+2.  **Sync Environment**:
+
+    Run the following command in the project root. `uv` will automatically read `pyproject.toml`, create a virtual environment, and install all required dependencies.
+    ```shell
+    uv sync
+    ```
+
+### Method 2: Using pip
+
+If you prefer not to use `uv`, you can install dependencies manually with `pip`.
+
+1.  **Create and Activate a Virtual Environment (Optional but Recommended)**:
+    ```shell
+    # Create virtual environment
+    python -m venv .venv
+
+    # Activate virtual environment
+    # Windows
+    .venv\Scripts\activate
+    # macOS / Linux
+    source .venv/bin/activate
+    ```
+
+2.  **Install Dependencies**:
+    ```shell
+    pip install blowfish>=0.6.1 numpy>=2.3.2 pyquaternion>=0.9.9 "sentence-transformers>=5.1.0" torch>=2.8.0 xxhash>=3.5.0 zstandard>=0.24.0
+    ```
+
+3. Some PowerShell scripts use `uv` by default. Please modify the scripts as needed, for example, by replacing `uv run` with `python3`.
+
+## Workflow
+
+### Step 1: Prepare Voice Files
+
+If your Evo voice pack is in `.at9` format, you need to convert it to `.wav` first.
+
+1.  **Place Source Files**: Extract the Evo voice pack and place the `voice` directory (containing all `.at9` files) into the `FC-Steam\Trails in the Sky FC\` directory. The structure should look like this:
+    ```
+     FC-Steam
+     └── Trails in the Sky FC
+         └── voice
+             └── 000
+                 └── ch0010000001.at9
+    ```
+
+2.  **Run Conversion Script**: Execute `convert_voice.ps1`. This script will automatically download the necessary tools and output the converted `.wav` files to the `voice\wav` folder in the project root.
+    ```powershell
+    ./convert_voice.ps1
+    ```
+
+### Step 2: Extract Text from the Original Game
+
+Run `extract_voice_data.py` to process the original game script files located in `SoraVoiceScripts/cn.fc/out.msg/`. This script extracts all voiced dialogue and generates `voice_data.json`.
+
+```bash
+git submodule update SoraVoiceScripts --init
+uv run ./extract_voice_data.py
+```
+
+This script generates `voice_data.json`, which contains all voice data extracted from the original game. It is a JSON array where each element represents a voice line with the following fields:
+
+-   `character_id`: The character's ID.
+-   `voice_id`: The unique identifier for the voice file.
+-   `text`: The cleaned dialogue text.
+-   `source_file`: The original script file from which the data was sourced.
+
+### Step 3: Prepare Remastered Game Assets
+
+This step extracts the necessary assets from the remastered game, primarily the `t_voice.json` file.
+
+**Preparation:**
+
+This script will automatically download `KuroTools`. Just ensure the `kuro_mdl_tool` submodule is initialized:
+
+```bash
+git submodule update --init kuro_mdl_tool
+```
+
+**Execution:**
+
+Run the `prepare_game_assets.ps1` script, providing the game installation path.
+
+```powershell
+# Replace "Your\Game\Path" with the actual game installation path
+.\prepare_game_assets.ps1 -GamePath "Your\Game\Path"
+```
+
+**Output:**
+
+-   The contents of `voice.pac` and `table_sc.pac` will be unpacked into the `kuro_mdl_tool\misc\` directory.
+-   The most important output, `t_voice.json`, will be generated in the `KuroTools v1.3\scripts&tables\` directory, which is required for the next matching step.
+
+### Step 4: Run the Core Matching Script
+
+This is the most critical step. Run `match_voices.py` to load the new game's voice table (`KuroTools v1.3/scripts&tables/t_voice.json`) and the `voice_data.json` generated previously, then perform the text matching.
+
+```bash
+# Run basic matching (only main story voices by default)
+uv run match_voices.py
+
+# (Optional) Match voices for specific characters
+uv run match_voices.py --character-ids 001 002
+
+# (Optional) Match main, battle, and active voices
+uv run match_voices.py --match-battle --match-active
+```
+
+This script generates three main files:
+*   `merged_voice_data.json`: Successfully matched voice data, for analysis.
+*   `unmatched_voice_data.json`: Unmatched voice data, for analysis.
+*   `output/t_voice.json`: **The core output file**. This is an updated voice table where matched entries now point to the Evo voice filenames. This file is the basis for the next packaging step.
+
+#### Match Data Format (`merged_voice_data.json`)
+
+Successfully matched data is saved in `merged_voice_data.json`. Each entry contains:
+
+-   `new_voice_id`: The ID of the remastered voice.
+-   `new_filename`: The filename of the remastered voice (without extension).
+-   `new_text`: The corresponding text of the remastered voice.
+-   `old_voice_id`: The ID of the matched Evo voice file.
+-   `old_text`: The corresponding text of the matched Evo voice.
+-   `character_id`: The character ID.
+-   `source_file`: The source script file of the Evo voice.
+-   `match_type`: The matching method used (`exact`, `normalized`, `vector_search (score)`).
+-   `classification`: Classification info for the remastered voice file (`type`, `character_id`, `category`, `number`).
+
+#### Script Arguments Explained
+
+`match_voices.py` provides flexible command-line arguments:
+
+-   **Basic Usage**: `uv run match_voices.py` - Matches only main story voices.
+-   **Filter by Character ID**: `--character-ids <ID1> <ID2>` - Processes only specified character IDs.
+-   **Match Active Voices**: `--match-active` - Includes active voices (`av` category).
+-   **Match Battle Voices**: `--match-battle` - Includes battle voices (`b` and `bv` categories).
+-   **Match Other Voices**: `--match-other` - Includes voices classified as `unknown`.
+-   **Match Sound Effects**: `--match-sfx` - Includes sound effect files (`v_se_*`).
+-   **Verbose Logging**: `-v` or `--verbose` - Outputs detailed logs for debugging.
+-   **Disable Vector Search**: `--no-similarity-search` - Disables vector-based similarity search for stricter matching.
+-   **Custom Similarity Threshold**: `--similarity-threshold 0.9` - Sets the similarity score threshold (default: `0.85`).
+-   **Map Failed to Empty**: Enabled by default. Unmatched voices point to a silent `EMPTY.wav` to prevent in-game errors. Disable with `--no-map-failed-to-empty`.
+
+Arguments can be combined. For example, to match main, battle, and active voices for Estelle (ID 001) and Joshua (ID 002):
+`uv run match_voices.py --character-ids 001 002 --match-battle --match-active`
+
+### Step 5: Package the Final Assets
+
+This final step integrates all matching results and voice files to generate game-ready `.pac` files.
+
+Run the `package_assets.ps1` script:
+
+```powershell
+./package_assets.ps1
+```
+
+This script automates:
+1.  Converting `output/t_voice.json` to `t_voice.tbl`.
+2.  Preparing a temporary packaging environment.
+3.  Replacing the old `t_voice.tbl` and merging the new `.wav` files.
+4.  Repackaging `voice.pac` and `table_sc.pac`.
+5.  Placing the final `.pac` files in the `output` directory.
+
+### Step 6: Apply or Restore the Patch
+
+After packaging, use `update_game_files.ps1` to automatically apply the generated `.pac` files to your game directory or restore the original files from a backup.
+
+**Apply Patch:**
+
+This command copies `table_sc.pac` and `voice.pac` to the game's data directory, automatically backing up the original files on the first run.
+
+```powershell
+# Replace "Your\Game\Path" with the actual game installation path
+.\update_game_files.ps1 -GamePath "Your\Game\Path"
+```
+
+**Restore Originals:**
+
+To remove the patch and restore the original game files, use the `-Restore` parameter.
+
+```powershell
+# Replace "Your\Game\Path" with the actual game installation path
+.\update_game_files.ps1 -GamePath "Your\Game\Path" -Restore
+```
+
+### Step 7: Analysis and Debugging (Optional)
+
+To analyze why some voices failed to match, you can run:
+
+*   **`analyze_voice_files.py`**: Checks for consistency between `t_voice.json` and the files in the `wav/` directory.
+*   **`analyze_context.py`**: Examines `unmatched_voice_data.json` to find unmatched lines surrounded by matched ones, providing clues for manual fixing.
+
+## Main Scripts and Files Explained
+
+*   `extract_voice_data.py`: Extracts voice and text data from the **original** game scripts, generating `voice_data.json`.
+*   `match_voices.py`: **Core matching script**. Matches new text with old text using various algorithms.
+*   `analyze_voice_files.py`: **Utility script**. Verifies consistency between `t_voice.json` and on-disk `.wav` files.
+*   `analyze_context.py`: **Debugging tool**. Analyzes unmatched voices using context.
+*   `converter.py`: **Utility script**. Converts text files from Shift-JIS to UTF-8.
+*   `convert_voice.ps1`: **Utility script**. Converts `.at9` audio files to `.wav` using `atractool-reloaded`.
+*   `merged_voice_data.json`: **Output file**. Contains all successfully matched voice entries.
+*   `unmatched_voice_data.json`: **Output file**. Contains all unmatched voice entries.
+*   `package_assets.ps1`: **Packaging script**. Automates the final step of packaging all assets into `voice.pac` and `table_sc.pac`.
+*   `update_game_files.ps1`: **Deployment script**. Copies the final `.pac` files to the game directory and supports restoring from backups.
+
+## Acknowledgements
+
+This project was made possible by the support of the following excellent open-source tools and communities. A sincere thank you to them:
+
+-   **[kuro_mdl_tool](https://github.com/eArmada8/kuro_mdl_tool)** by eArmada8
+    -   **Role**: Provided the core functionality for handling Falcom game assets (`.mdl` files), which is key to packaging the `.pac` files in this toolset.
+
+-   **[ATRACTool-Reloaded](https://github.com/XyLe-GBP/ATRACTool-Reloaded)** by XyLe-GBP
+    -   **Role**: An indispensable part of the voice extraction pipeline, used to efficiently convert Sony's `.at9` audio files to the universal `.wav` format.
+
+-   **[SoraVoiceScripts](https://github.com/ZhenjianYang/SoraVoiceScripts)** by ZhenjianYang
+    -   **Role**: Provided the original voice scripts for *Trails in the Sky FC Evolution*, which formed the data foundation for voice matching.
+
+-   **[Kuro Tools](https://github.com/nnguyen259/KuroTools)** by nnguyen259
+    -   **Role**: Offered valuable tools and references for understanding and processing Falcom's game file formats.
+
+-   **[Trails Series - Cafe](https://trails-game.com/)**
+    -   **Role**: As an excellent fan community and resource site for the Trails series, it provided a wealth of background knowledge and data references for the project.
