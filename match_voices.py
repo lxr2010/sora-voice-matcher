@@ -81,7 +81,7 @@ def classify_voice_file(filename):
               或 {'type': 'sound_effect', 'description': 'cat_02'}
     """
     # 角色语音: v<角色ID>_<类型>_<序号>.wav (e.g., v001_00_0001.wav, v327_gs_0002.wav)
-    match = re.match(r'^v(\d{3})_(\w{2})_(\d{4})\.wav$', filename)
+    match = re.match(r'^v(\d{3})_(\w{2})_(\d{4}[br]?)\.wav$', filename)
     if match:
         char_id, category_code, number = match.groups()
 
@@ -103,7 +103,7 @@ def classify_voice_file(filename):
         }
 
     # 战斗/系统语音: v<角色ID>_<类型><序号>.wav (e.g., v001_b0001.wav, v001_s0001.wav, v001_b0118b.wav)
-    match = re.match(r'^v(\d{3})_([bs])(\d{4}[b]?)\.wav$', filename)
+    match = re.match(r'^v(\d{3})_([bs])(\d{4}[br]?)\.wav$', filename)
     if match:
         char_id, category_code, number = match.groups()
         category_map = {
@@ -253,36 +253,58 @@ def main():
 
     # 为旧语音数据添加上下文
     logger.info("正在为旧语音数据添加上下文...")
-    # 按源文件和全局ID排序以确保对话顺序
-    old_data_list.sort(key=lambda x: (x.get('source_file', ''), x.get('global_id', '')))
+    # 从 voice_id 解析场景信息并排序
+    for entry in old_data_list:
+        voice_id = entry.get('voice_id', '')
+        if isinstance(voice_id, str) and len(voice_id) >= 10:
+            entry['scene_id'] = voice_id[3:6]
+            entry['scene_seq_id'] = int(voice_id[6:10])
+        else:
+            # 为不符合格式的ID设置默认值以便排序
+            entry['scene_id'] = ""
+            entry['scene_seq_id'] = -1
+
+    old_data_list.sort(key=lambda x: (x.get('scene_id', ''), x.get('scene_seq_id', '')))
     for i, entry in enumerate(old_data_list):
-        # 添加上一句上下文，仅当在同一源文件内时
-        if i > 0 and old_data_list[i-1].get('source_file') == entry.get('source_file'):
+        # 检查是否在同一场景内
+        is_same_scene_prev = (i > 0 and 
+                              old_data_list[i-1].get('scene_id') == entry.get('scene_id'))
+        
+        is_same_scene_next = (i < len(old_data_list) - 1 and 
+                              old_data_list[i+1].get('scene_id') == entry.get('scene_id'))
+
+        # 添加上一句上下文
+        if is_same_scene_prev:
             entry['context_prev'] = old_data_list[i-1].get('text', '')
         else:
             entry['context_prev'] = ""
         
-        # 添加下一句上下文，仅当在同一源文件内时
-        if i < len(old_data_list) - 1 and old_data_list[i+1].get('source_file') == entry.get('source_file'):
+        # 添加下一句上下文
+        if is_same_scene_next:
             entry['context_next'] = old_data_list[i+1].get('text', '')
         else:
             entry['context_next'] = ""
     logger.info("旧数据上下文添加完成。")
 
-    # 加载预训练的 sentence-transformer 模型
-    # 'paraphrase-multilingual-MiniLM-L12-v2' 是一个性能优秀的多语言模型
-    logger.info("正在加载文本向量化模型...")
-    model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-    logger.info("模型加载完成。")
+    if not args.no_similarity_search:
+        # 加载预训练的 sentence-transformer 模型
+        # 'paraphrase-multilingual-MiniLM-L12-v2' 是一个性能优秀的多语言模型
+        logger.info("正在加载文本向量化模型...")
+        model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+        logger.info("模型加载完成。")
 
-    # 为旧数据创建向量嵌入
-    logger.info("正在为旧语音数据创建上下文向量嵌入...")
-    old_contextual_texts = [
-        f"{entry.get('context_prev', '')} {entry.get('text', '')} {entry.get('context_next', '')}".strip()
-        for entry in old_data_list
-    ]
-    old_embeddings = model.encode(old_contextual_texts, convert_to_tensor=True)
-    logger.info("向量嵌入创建完成。")
+        # 为旧数据创建向量嵌入
+        logger.info("正在为旧语音数据创建上下文向量嵌入...")
+        old_contextual_texts = [
+            f"{entry.get('context_prev', '')} {entry.get('text', '')} {entry.get('context_next', '')}".strip()
+            for entry in old_data_list
+        ]
+        old_embeddings = model.encode(old_contextual_texts, convert_to_tensor=True)
+        logger.info("向量嵌入创建完成。")
+    else:
+        logger.info("跳过向量嵌入创建，因为 --no-similarity-search 被设置。")
+        model = None
+        old_embeddings = None
 
     # 为旧数据创建快速查找映射（一个文本可能对应多个语音）
     old_data_map = defaultdict(list)
@@ -362,7 +384,8 @@ def main():
                 'new_filename': new_entry.get('filename'),
                 'new_text': new_entry['text'],
                 'old_voice_id': best_match.get('voice_id'),
-                'old_global_id': best_match.get('global_id'),
+                'old_scene_id': best_match.get('scene_id'),
+                'old_scene_seq_id': best_match.get('scene_seq_id'),
                 'old_text': best_match.get('text'),
                 'character_id': best_match.get('character_id'),
                 'source_file': best_match.get('source_file'),
@@ -384,9 +407,10 @@ def main():
 
     for match in matched_data:
         new_id = match['new_voice_id']
-        old_global_id = match.get('old_global_id')
+        scene_id = match.get('old_scene_id')
+        scene_seq_id = match.get('old_scene_seq_id')
 
-        if old_global_id is None: # Should not happen with recent changes, but for safety
+        if scene_id is None or scene_seq_id is None: # Skip if no scene info
             confirmed_matches.append(match)
             continue
 
@@ -394,25 +418,28 @@ def main():
         prev_new_entry = new_id_to_new_entry_map.get(new_id - 1)
         prev_match = new_id_to_match_map.get(new_id - 1) if prev_new_entry else None
         
-        # Context is OK if: 1. There is no previous entry. 2. The previous entry was matched correctly.
+        # Context is OK if: 1. No previous entry. 2. Prev entry is not in the same scene. 3. Prev entry is sequential.
         prev_context_ok = (prev_new_entry is None) or \
                           (prev_match and (
-                              prev_match.get('source_file') != match.get('source_file') or \
-                              prev_match.get('old_global_id') == old_global_id - 1
+                              prev_match.get('old_scene_id') != scene_id or \
+                              prev_match.get('old_scene_seq_id') == scene_seq_id - 1
                           ))
 
         # --- Check next voice context ---
         next_new_entry = new_id_to_new_entry_map.get(new_id + 1)
         next_match = new_id_to_match_map.get(new_id + 1) if next_new_entry else None
 
-        # Context is OK if: 1. There is no next entry. 2. The next entry was matched correctly.
+        # Context is OK if: 1. No next entry. 2. Next entry is not in the same scene. 3. Next entry is sequential.
         next_context_ok = (next_new_entry is None) or \
                           (next_match and (
-                              next_match.get('source_file') != match.get('source_file') or \
-                              next_match.get('old_global_id') == old_global_id + 1
+                              next_match.get('old_scene_id') != scene_id or \
+                              next_match.get('old_scene_seq_id') == scene_seq_id + 1
                           ))
 
-        if prev_context_ok and next_context_ok:
+        inside_context_ok = (next_new_entry is None or prev_new_entry is None or next_match is None or prev_match is None or next_match is None or next_match.get('old_scene_id') != prev_match.get('old_scene_id')) or \
+            (prev_match.get('old_scene_seq_id') <= scene_seq_id <= next_match.get('old_scene_seq_id'))
+
+        if prev_context_ok and next_context_ok and inside_context_ok:
             confirmed_matches.append(match)
         else:
             # 仅当候选项不唯一（0或>=2）时，才考虑撤销
@@ -439,12 +466,13 @@ def main():
     matched_data = confirmed_matches
     # Combine Pass 1 failures with reverted entries for the next passes
     remaining_entries_pass2.extend(entries_for_rematch)
+    remaining_entries_pass2.sort(key=lambda x: x['id'])
 
     # --- Pass 2: Contextual Matching for Ambiguous Entries ---
     logger.info("\n--- 第二遍: 对剩余条目中存在歧义的部分执行上下文精确匹配 ---")
     pass2_success_count = 0
     remaining_entries_pass3 = []  # Entries that will go to vector search
-    for new_entry in remaining_entries_pass2:
+    for new_entry in reversed(remaining_entries_pass2):
         new_text = new_entry.get('text', '')
         
         # Find potential candidates from exact text match
@@ -473,7 +501,8 @@ def main():
                         'new_filename': new_entry.get('filename'),
                         'new_text': new_entry['text'],
                         'old_voice_id': candidate.get('voice_id'),
-                        'old_global_id': candidate.get('global_id'),
+                        'old_scene_id': candidate.get('scene_id'),
+                        'old_scene_seq_id': candidate.get('scene_seq_id'),
                         'old_text': candidate.get('text'),
                         'character_id': candidate.get('character_id'),
                         'source_file': candidate.get('source_file'),
@@ -505,7 +534,8 @@ def main():
                 'new_filename': new_entry.get('filename'),
                 'new_text': new_entry['text'],
                 'old_voice_id': best_match.get('voice_id'),
-                'old_global_id': best_match.get('global_id'),
+                'old_scene_id': best_match.get('scene_id'),
+                'old_scene_seq_id': best_match.get('scene_seq_id'),
                 'old_text': best_match.get('text'),
                 'character_id': best_match.get('character_id'),
                 'source_file': best_match.get('source_file'),
@@ -515,6 +545,7 @@ def main():
         else:
             unmatched_data.append({
                 'new_voice_id': new_entry.get('id'),
+                'new_filename': new_entry.get('filename'),
                 'text': new_entry['text']
             })
     logger.info(f"第三遍完成: 成功匹配 {pass3_success_count} 条。")

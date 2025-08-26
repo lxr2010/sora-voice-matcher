@@ -16,3 +16,5 @@ KuroTools v1.3
 /voice
 /script
 /output
+
+/match_voice.log*

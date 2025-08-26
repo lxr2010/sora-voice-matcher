@@ -10,7 +10,7 @@ def parse_voice_id(voice_id):
     """从语音ID（如 '0940010128V'）中提取数字部分。"""
     try:
         # 移除末尾的 'V' 并转换为整数
-        return int(voice_id[:-1])
+        return int(voice_id[3:-1])
     except (ValueError, TypeError):
         return None
 

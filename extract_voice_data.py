@@ -7,10 +7,13 @@ import json
 SOURCE_DIR = r'SoraVoiceScripts\cn.fc\out.msg'
 # 输出文件：保存提取数据的JSON文件
 OUTPUT_FILE = 'voice_data.json'
+OUTPUT_SCRIPT_FILE = 'script_data.json'
 # 语音ID的正则表达式
 VOICE_ID_PATTERN = re.compile(r'#(\d+V)')
 # 控制字符的正则表达式，匹配 [xNN] 格式
 CONTROL_CODE_PATTERN = re.compile(r'(\[|骸)xX][0-9a-fA-F]{2,}\]')
+# 脚本文本ID的正则表达式
+SCRIPT_ID_PATTERN = re.compile(r'#(\d+)J')
 
 def clean_text(text):
     """清理文本中的语音ID和所有控制字符。"""
@@ -70,6 +73,13 @@ def parse_script_file(file_path):
             match = VOICE_ID_PATTERN.search(line)
             if match and current_char_id:
                 voice_id = match.group(1)
+
+                # 检查脚本文本ID
+                script_id_match = SCRIPT_ID_PATTERN.search(line)
+                if script_id_match:
+                    script_id = script_id_match.group(1)
+                else:
+                    script_id = ""
                 
                 # 处理换行符 [x01]
                 dialogue_text = line
@@ -88,6 +98,7 @@ def parse_script_file(file_path):
                     voice_entries.append({
                         'character_id': current_char_id,
                         'voice_id': voice_id,
+                        'script_id': script_id,
                         'text': cleaned_dialogue,
                         'source_file': os.path.basename(file_path)
                     })
@@ -120,10 +131,42 @@ def main():
             if extracted_data:
                 all_voice_data.extend(extracted_data)
 
-    # 添加全局ID和上下文
-    print("\nAdding global IDs and context...")
+    # 按照script_id去重， 并输出为另一个JSON文件
+    print("\nDeduplicating entries by script_id...")
+    unique_scripts = {}
+    for entry in all_voice_data:
+        unique_scripts[entry['script_id']] = entry
+    all_script_data = list(unique_scripts.values())
+    # 重新排序以确保上下文正确
+    all_script_data.sort(key=lambda x: x['script_id'])
+    print(f"Deduplication complete. {len(all_script_data)} unique entries remaining.")
+
+    # 添加上下文
+    print("\nAdding context...")
+    for i, entry in enumerate(all_script_data):
+        entry['context_prev'] = all_script_data[i-1]['text'] if i > 0 else ""
+        entry['context_next'] = all_script_data[i+1]['text'] if i < len(all_script_data) - 1 else ""
+
+    # 保存到JSON文件
+    output_path = os.path.abspath(OUTPUT_SCRIPT_FILE)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(all_script_data, f, ensure_ascii=False, indent=4)
+    print(f"\nScript data saved to {output_path}")
+    
+
+    # 按voice_id去重
+    print("\nDeduplicating entries by voice_id...")
+    unique_voices = {}
+    for entry in all_voice_data:
+        unique_voices[entry['voice_id']] = entry
+    all_voice_data = list(unique_voices.values())
+    # 重新排序以确保上下文正确
+    all_voice_data.sort(key=lambda x: x['voice_id'])
+    print(f"Deduplication complete. {len(all_voice_data)} unique entries remaining.")
+
+    # 添加上下文
+    print("\nAdding context...")
     for i, entry in enumerate(all_voice_data):
-        entry['global_id'] = i
         
         # 添加上一句上下文
         if i > 0:
