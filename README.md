@@ -32,7 +32,7 @@
 
 ### 方法一：使用 uv (推荐)
 
-1.  **安装 uv**:
+1.  **安装 uv**：
 
     如果您尚未安装 `uv`，请根据您的操作系统执行相应命令：
     ```shell
@@ -43,7 +43,7 @@
     curl -LsSf https://astral.sh/uv/install.sh | sh
     ```
 
-2.  **同步环境**:
+2.  **同步环境**：
 
     在项目根目录下运行以下命令，`uv` 会自动读取 `pyproject.toml` 文件，创建虚拟环境并安装所有必需的依赖项。
     ```shell
@@ -54,7 +54,7 @@
 
 如果您不想使用 `uv`，也可以使用 `pip` 手动安装依赖。
 
-1.  **创建并激活虚拟环境 (可选但推荐)**:
+1.  **创建并激活虚拟环境 (可选但推荐)**：
     ```shell
     # 创建虚拟环境
     python -m venv .venv
@@ -281,27 +281,23 @@ uv run match_voices.py --match-battle --match-active
 *   `package_assets.ps1`: **打包脚本**。自动化最后一步，将所有资源打包成最终的 `voice.pac` 和 `table_sc.pac` 文件。
 *   `update_game_files.ps1`: **部署脚本**。用于将最终生成的 `.pac` 文件自动复制到游戏目录，并支持从备份中恢复原始文件。
 
-## 致谢
+## 许可协议
 
-本项目的完成离不开以下优秀开源工具和社区的支持，在此向他们表示诚挚的感谢：
+本项目中的脚本代码采用 **GNU General Public License v3.0** 进行许可。您可以在项目的根目录下找到 [LICENSE](LICENSE) 文件的完整内容。
 
--   **[kuro_mdl_tool](https://github.com/eArmada8/kuro_mdl_tool)** by eArmada8
-    -   **作用**: 提供了处理 Falcom 游戏资源（`.mdl` 文件）的核心功能，是本工具集打包 `.pac` 文件的关键。
+### 子模块许可
 
--   **[ATRACTool-Reloaded](https://github.com/XyLe-GBP/ATRACTool-Reloaded)** by XyLe-GBP
-    -   **作用**: 用于将索尼的 `.at9` 音频文件高效地转换为通用的 `.wav` 格式，是语音提取流程中不可或缺的一环。
+本项目包含的子模块使用其各自的许可协议：
+- **[kuro_mdl_tool](https://github.com/eArmada8/kuro_mdl_tool)**
+- **[SoraVoiceScripts](https://github.com/ZhenjianYang/SoraVoiceScripts)**
 
--   **[SoraVoiceScripts](https://github.com/ZhenjianYang/SoraVoiceScripts)** by ZhenjianYang
-    -   **作用**: 提供了原始的《空之轨迹FC Evolution》语音脚本，是进行语音匹配的数据基础。
+### 数据权利声明
 
--   **[Kuro Tools](https://github.com/nnguyen259/KuroTools)** by nnguyen259
-    -   **作用**: 为理解和处理 Falcom 的游戏文件格式提供了宝贵的工具和参考。
+本项目所使用的所有游戏数据，包括但不限于语音、文本、图像及其他资源，其所有权和知识产权均归属于 **Nihon Falcom Corporation**。本项目的作者不对这些数据主张任何权利。
 
--   **[轨迹系列-Cafe](https://trails-game.com/)**
-    -   **作用**: 作为优秀的轨迹系列粉丝社区和资料站，为项目提供了丰富的背景知识和数据参考。
+本项目仅为技术研究和个人娱乐目的而创建，旨在增强玩家的游戏体验。严禁将本工具及其产出用于任何商业用途。
 
 ---
-
 # Sora Voice Extractor & Matcher (English)
 
 ## Project Introduction
@@ -551,21 +547,22 @@ To analyze why some voices failed to match, you can run:
 *   `package_assets.ps1`: **Packaging script**. Automates the final step of packaging all assets into `voice.pac` and `table_sc.pac`.
 *   `update_game_files.ps1`: **Deployment script**. Copies the final `.pac` files to the game directory and supports restoring from backups.
 
+## License
+
+The script code in this project is licensed under the **GNU General Public License v3.0**. You can find the full text of the license in the [LICENSE](LICENSE) file at the root of the project.
+
+### Submodule Licensing
+
+The submodules included in this project are subject to their own licenses:
+- **[kuro_mdl_tool](https://github.com/eArmada8/kuro_mdl_tool)**
+- **[SoraVoiceScripts](https://github.com/ZhenjianYang/SoraVoiceScripts)**
+
+### Data Rights Disclaimer
+
+All game data used by this project, including but not limited to voice, text, images, and other assets, are the property and intellectual property of **Nihon Falcom Corporation**. The author of this project claims no rights over this data.
+
+This project is created for technical research and personal entertainment purposes only, aiming to enhance the player's gaming experience. Any commercial use of this tool and its output is strictly prohibited.
+
 ## Acknowledgements
 
 This project was made possible by the support of the following excellent open-source tools and communities. A sincere thank you to them:
-
--   **[kuro_mdl_tool](https://github.com/eArmada8/kuro_mdl_tool)** by eArmada8
-    -   **Role**: Provided the core functionality for handling Falcom game assets (`.mdl` files), which is key to packaging the `.pac` files in this toolset.
-
--   **[ATRACTool-Reloaded](https://github.com/XyLe-GBP/ATRACTool-Reloaded)** by XyLe-GBP
-    -   **Role**: An indispensable part of the voice extraction pipeline, used to efficiently convert Sony's `.at9` audio files to the universal `.wav` format.
-
--   **[SoraVoiceScripts](https://github.com/ZhenjianYang/SoraVoiceScripts)** by ZhenjianYang
-    -   **Role**: Provided the original voice scripts for *Trails in the Sky FC Evolution*, which formed the data foundation for voice matching.
-
--   **[Kuro Tools](https://github.com/nnguyen259/KuroTools)** by nnguyen259
-    -   **Role**: Offered valuable tools and references for understanding and processing Falcom's game file formats.
-
--   **[Trails Series - Cafe](https://trails-game.com/)**
-    -   **Role**: As an excellent fan community and resource site for the Trails series, it provided a wealth of background knowledge and data references for the project.
