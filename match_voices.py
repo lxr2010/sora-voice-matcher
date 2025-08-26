@@ -57,6 +57,8 @@ def create_empty_wav_file(path):
 NEW_VOICE_FILE = r'KuroTools v1.3\scripts&tables\t_voice.json'
 # 旧版本语音数据文件
 OLD_VOICE_FILE = 'voice_data.json'
+# 旧版本脚本数据文件
+OLD_SCRIPT_FILE = 'script_data.json'
 # 输出文件：成功匹配的数据
 MERGED_OUTPUT_FILE = 'merged_voice_data.json'
 # 输出文件：未成功匹配的数据
@@ -128,7 +130,7 @@ def classify_voice_file(filename):
 
     return {'type': 'unknown', 'filename': filename}
 
-def find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_list, model, old_embeddings, args, used_old_voice_ids, methods):
+def find_best_match(new_entry, old_data_map, old_data_normalized_map, old_script_list, model, old_embeddings, args, used_old_voice_ids, methods):
     """执行指定方法的匹配策略来查找最佳匹配。"""
     new_text = new_entry['text']
 
@@ -150,7 +152,7 @@ def find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_l
         query_embedding = model.encode(contextual_new_text, convert_to_tensor=True)
         hits = util.semantic_search(query_embedding, old_embeddings, top_k=1)
         if hits and hits[0][0]['score'] > args.similarity_threshold:
-            best_match_candidate = old_data_list[hits[0][0]['corpus_id']]
+            best_match_candidate = old_script_list[hits[0][0]['corpus_id']]
             score = hits[0][0]['score']
             match_type = f'vector_search ({score:.2f})'
             return best_match_candidate, match_type
@@ -226,6 +228,8 @@ def main():
             new_data = json.load(f)['data'][0]['data']
         with open(OLD_VOICE_FILE, 'r', encoding='utf-8') as f:
             old_data_list = json.load(f)
+        with open(OLD_SCRIPT_FILE, 'r', encoding='utf-8') as f:
+            old_script_list = json.load(f)
     except FileNotFoundError as e:
         logger.error(f"错误：找不到文件 {e.filename}")
         return
@@ -294,10 +298,10 @@ def main():
         logger.info("模型加载完成。")
 
         # 为旧数据创建向量嵌入
-        logger.info("正在为旧语音数据创建上下文向量嵌入...")
+        logger.info("正在为旧脚本数据创建上下文向量嵌入...")
         old_contextual_texts = [
             f"{entry.get('context_prev', '')} {entry.get('text', '')} {entry.get('context_next', '')}".strip()
-            for entry in old_data_list
+            for entry in old_script_list
         ]
         old_embeddings = model.encode(old_contextual_texts, convert_to_tensor=True)
         logger.info("向量嵌入创建完成。")
@@ -319,12 +323,23 @@ def main():
             if normalized_text:
                 old_data_normalized_map[normalized_text].append(entry)
 
+    # 为旧脚本数据创建快速查找映射
+    old_script_map = defaultdict(list)
+    for entry in old_script_list:
+        if text := entry.get('text'):
+            old_script_map[text].append(entry)
+
+    # 创建 voice_id 到 old_data_list 条目的映射
+    old_voice_id_to_entry_map = {e['voice_id']: e for e in old_data_list}
+
     # 对候选项列表进行排序，确保优先匹配文件名靠前的语音
     logger.info("正在对具有相同文本的候选项进行排序...")
     for text in old_data_map:
         old_data_map[text].sort(key=lambda e: e.get('voice_id', ''))
     for text in old_data_normalized_map:
         old_data_normalized_map[text].sort(key=lambda e: e.get('voice_id', ''))
+    for text in old_script_map:
+        old_script_map[text].sort(key=lambda e: e.get('script_id', 0))
     logger.info("排序完成。")
 
     matched_data = []
@@ -373,7 +388,7 @@ def main():
     remaining_entries_pass2 = []
     pass1_success_count = 0
     for new_entry in entries_to_process:
-        best_match, match_type = find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_list, model, old_embeddings, args, used_old_voice_ids, methods=['exact', 'normalized'])
+        best_match, match_type = find_best_match(new_entry, old_data_map, old_data_normalized_map, old_script_list, model, old_embeddings, args, used_old_voice_ids, methods=['exact', 'normalized'])
 
         if best_match:
             pass1_success_count += 1
@@ -475,15 +490,13 @@ def main():
     for new_entry in reversed(remaining_entries_pass2):
         new_text = new_entry.get('text', '')
         
-        # Find potential candidates from exact text match
-        candidates = old_data_map.get(new_text, [])
+        # Find potential candidates from script data for contextual matching
+        candidates = old_script_map.get(new_text, [])
         
         # Only perform context match if there's ambiguity (multiple candidates)
         if new_text and len(candidates) > 1:
             found_context_match = False
             for candidate in candidates:
-                if candidate['voice_id'] in used_old_voice_ids:
-                    continue
 
                 # Triplet check: current text (already matches), previous, and next context
                 if new_entry.get('context_prev', '') == candidate.get('context_prev', '') and \
@@ -523,10 +536,14 @@ def main():
     logger.info("\n--- 第三遍: 对剩余条目执行向量相似度匹配 ---")
     pass3_success_count = 0
     for new_entry in remaining_entries_pass3:
-        best_match, match_type = find_best_match(new_entry, old_data_map, old_data_normalized_map, old_data_list, model, old_embeddings, args, used_old_voice_ids, methods=['vector'])
+        best_match, match_type = find_best_match(new_entry, old_data_map, old_data_normalized_map, old_script_list, model, old_embeddings, args, used_old_voice_ids, methods=['vector'])
 
         if best_match:
             pass3_success_count += 1
+            logger.debug(f"  - 向量相似度匹配成功: New ID {new_entry['id']} {match_type[13:]}")
+            logger.debug(f"    - New Context: [{new_entry['context_prev']} {new_entry['text']} {new_entry['context_next']}]")
+            logger.debug(f"    - Old Context: [{best_match['context_prev']} {best_match['text']} {best_match['context_next']}]")
+
             vector_search_success_count += 1
             classification = classify_voice_file(f"{new_entry.get('filename')}.wav")
             matched_data.append({

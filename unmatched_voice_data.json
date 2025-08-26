@@ -75,14 +75,19 @@
         "text": "イエス・マム！"
     },
     {
+        "new_voice_id": 46675,
+        "new_filename": "v001_04_0496",
+        "text": "イエス・マム！"
+    },
+    {
         "new_voice_id": 46645,
         "new_filename": "v263_04_0008",
         "text": "イエス・マム！"
     },
     {
-        "new_voice_id": 46340,
-        "new_filename": "v140_04_0097",
-        "text": "王室親衛隊、中隊長。ユリア・シュバルツ中尉だ。"
+        "new_voice_id": 46403,
+        "new_filename": "v002_04_0331",
+        "text": "了解です！"
     },
     {
         "new_voice_id": 46263,
@@ -100,9 +105,9 @@
         "text": "おお～！エステル、ヨシュア！"
     },
     {
-        "new_voice_id": 45687,
-        "new_filename": "v001_04_0288",
-        "text": "え……"
+        "new_voice_id": 46036,
+        "new_filename": "v139_04_0009",
+        "text": "おや……？"
     },
     {
         "new_voice_id": 45620,
@@ -175,6 +180,16 @@
         "text": "そんな恥ずかしいセリフ、よくさらっと言えるもんだね。"
     },
     {
+        "new_voice_id": 42767,
+        "new_filename": "v001_03_0639",
+        "text": "ひゃぁああ～～～っ！"
+    },
+    {
+        "new_voice_id": 42682,
+        "new_filename": "v002_03_0382",
+        "text": "わかりました。"
+    },
+    {
         "new_voice_id": 42599,
         "new_filename": "v265_03_0007",
         "text": "イエス・サー！"
@@ -230,9 +245,19 @@
         "text": "え……"
     },
     {
+        "new_voice_id": 42099,
+        "new_filename": "v126_03_0109",
+        "text": "女神（エイドス）の加護を。くれぐれも気を付けて。"
+    },
+    {
         "new_voice_id": 41736,
         "new_filename": "v002_03_0250",
         "text": "了解しました。"
+    },
+    {
+        "new_voice_id": 41190,
+        "new_filename": "v007_03_0206",
+        "text": "…………………………"
     },
     {
         "new_voice_id": 40641,
@@ -255,14 +280,14 @@
         "text": "よーし、近づいてきた！"
     },
     {
+        "new_voice_id": 38499,
+        "new_filename": "v001_02_0510",
+        "text": "あ、あれは……"
+    },
+    {
         "new_voice_id": 38316,
         "new_filename": "v118_02_0089",
         "text": "！！！"
-    },
-    {
-        "new_voice_id": 38247,
-        "new_filename": "v006_02_0357",
-        "text": "……ジーク！"
     },
     {
         "new_voice_id": 37986,
@@ -308,6 +333,11 @@
         "new_voice_id": 34446,
         "new_filename": "v210_01_0008",
         "text": "お、お前たちは！？"
+    },
+    {
+        "new_voice_id": 34330,
+        "new_filename": "v214_01_0002",
+        "text": "がってんだ！"
     },
     {
         "new_voice_id": 34078,
@@ -370,9 +400,19 @@
         "text": "七耀石を加工した極薄の結晶回路（クオーツ）でね。"
     },
     {
+        "new_voice_id": 31490,
+        "new_filename": "v002_00_0301",
+        "text": "了解。"
+    },
+    {
         "new_voice_id": 31165,
         "new_filename": "v109_00_0014",
         "text": "まあ……！それは七耀石ですわね。"
+    },
+    {
+        "new_voice_id": 30854,
+        "new_filename": "v206_00_0011",
+        "text": "そろそろ戻ってくると思うわ。"
     },
     {
         "new_voice_id": 30490,
@@ -383,6 +423,16 @@
         "new_voice_id": 30489,
         "new_filename": "v201_00_0013",
         "text": "…そんなに恐がるなよ～！"
+    },
+    {
+        "new_voice_id": 30488,
+        "new_filename": "v202_00_0007",
+        "text": "……こわいよ～っ……"
+    },
+    {
+        "new_voice_id": 30487,
+        "new_filename": "v202_00_0006",
+        "text": "く、暗いよ～っ……"
     },
     {
         "new_voice_id": 30319,

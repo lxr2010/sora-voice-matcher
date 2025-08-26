@@ -77,9 +77,9 @@ def parse_script_file(file_path):
                 # 检查脚本文本ID
                 script_id_match = SCRIPT_ID_PATTERN.search(line)
                 if script_id_match:
-                    script_id = script_id_match.group(1)
+                    script_id = int(script_id_match.group(1))
                 else:
-                    script_id = ""
+                    script_id = -1
                 
                 # 处理换行符 [x01]
                 dialogue_text = line
