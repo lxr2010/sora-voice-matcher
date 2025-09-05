@@ -160,7 +160,15 @@ def find_best_match(new_entry, old_data_map, old_data_normalized_map, old_script
             best_match_candidate = old_script_list[hits[0][0]['corpus_id']]
             score = hits[0][0]['score']
             match_type = f'vector_search ({score:.2f})'
-            return best_match_candidate, match_type
+            # check vector similarity of old text and matched text, in ignorance of context
+            best_match_text = best_match_candidate['text']
+            new_text = new_entry['text']
+            best_match_text_embedding = model.encode(best_match_text, convert_to_tensor=True)
+            new_text_embedding = model.encode(new_text, convert_to_tensor=True)
+            # calculate vector similarity, don't use semantic_search
+            text_similarity = util.cos_sim(new_text_embedding, best_match_text_embedding)[0][0].item()
+            if text_similarity >= args.similarity_threshold:
+                return best_match_candidate, match_type
 
     return None, None
 
@@ -256,14 +264,16 @@ def blockwise_match(scripts, voice_table, old_voice_id_to_entry_map):
         if (hint_after_old_voice_scene_order - 1) - (hint_before_old_voice_scene_order + 1) + 1 == end_match_idx - start_match_idx + 1:
             is_all_has_voice = True
             for idx in range(start_match_idx, end_match_idx + 1):
-                if old_voice_scene_order_to_entry_map.get(hint_before_old_voice_scene_order + 1 + idx - start_match_idx) is None:
+                predicate_voice_id = hint_before_old_voice_scene_order + 1 + idx - start_match_idx
+                if old_voice_scene_order_to_entry_map.get(predicate_voice_id) is None:
                     is_all_has_voice = False
                     break
             if is_all_has_voice:
                 logger.info(f"Found continuous margin: {margin_hint}")
                 for idx in range(start_match_idx, end_match_idx + 1):
-                    logger.info(f"Mapping {voice_table_context_match_stage2[idx][0]} to {old_voice_scene_order_to_entry_map[hint_before_old_voice_scene_order + idx - start_match_idx]['script_id']} | {old_voice_scene_order_to_entry_map[hint_before_old_voice_scene_order + idx - start_match_idx]['voice_id']}")
-                    voice_table_context_match[voice_table_context_match_stage2[idx][0]] = old_voice_scene_order_to_entry_map[hint_before_old_voice_scene_order + idx - start_match_idx]['script_id']
+                    predicate_voice_id = hint_before_old_voice_scene_order + 1 + idx - start_match_idx
+                    logger.info(f"Mapping {voice_table_context_match_stage2[idx][0]} to {old_voice_scene_order_to_entry_map[predicate_voice_id]['script_id']} | {old_voice_scene_order_to_entry_map[predicate_voice_id]['voice_id']}")
+                    voice_table_context_match[voice_table_context_match_stage2[idx][0]] = old_voice_scene_order_to_entry_map[predicate_voice_id]['script_id']
                 
     voice_table_context_match.update(voice_margin_hint_match)    
     voice_table_context_match_to_old_voice_id = {id: old_voice_id_to_entry_map[script_id_map[script_id]['voice_id']] for id, script_id in voice_table_context_match.items()}
