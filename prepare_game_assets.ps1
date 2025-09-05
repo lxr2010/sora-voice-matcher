@@ -51,7 +51,7 @@ $tbl2JsonScript = Join-Path -Path $scriptRoot -ChildPath "KuroTools v1.3\scripts
 $voicePac = Join-Path -Path $GamePath -ChildPath "pac\steam\voice.pac"
 $tableScPac = Join-Path -Path $GamePath -ChildPath "pac\steam\table_sc.pac"
 
-$voiceTbl = Join-Path -Path $scriptRoot -ChildPath "kuro_mdl_tool\misc\table_sc\t_voice.tbl"
+$voiceTbl = Join-Path -Path $scriptRoot -ChildPath "kuro_mdl_tool\misc\table_sc_origin\t_voice.tbl"
 
 # --- VALIDATION CHECKS ---
 Write-Host "Validating paths..."
@@ -103,6 +103,8 @@ Write-Host "Extracting table_sc.pac..."
 try {
     Push-Location (Split-Path -Path $extractPacScript -Parent)
     uv run python .\extract_pac.py $tableScPac
+    # 2.1 Copy extracted folder to "table_sc_origin"
+    Copy-Item -Path "table_sc" -Destination "table_sc_origin" -Recurse -Force
     Pop-Location
     Write-Host "'table_sc.pac' extracted successfully."
 } catch {

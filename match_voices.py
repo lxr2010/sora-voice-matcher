@@ -11,6 +11,7 @@ import struct
 from pathlib import Path
 import sys
 import io
+import csv
 
 # --- Logging Setup ---
 # Create logger
@@ -63,6 +64,10 @@ OLD_SCRIPT_FILE = 'script_data.json'
 MERGED_OUTPUT_FILE = 'merged_voice_data.json'
 # 输出文件：未成功匹配的数据
 UNMATCHED_OUTPUT_FILE = 'unmatched_voice_data.json'
+# 输出文件：跳过匹配的数据
+SKIPPED_OUTPUT_FILE = 'skipped_voice_data.json'
+# 输出文件：匹配结果CSV
+MATCH_RESULT_CSV = 'match_result.csv'
 
 
 def normalize_text(text):
@@ -159,6 +164,112 @@ def find_best_match(new_entry, old_data_map, old_data_normalized_map, old_script
 
     return None, None
 
+def blockwise_match(scripts, voice_table, old_voice_id_to_entry_map):
+    """按照3个为一组进行匹配，之后将匹配结果之间的空隙使用边界的匹配结果作为提示再次匹配，输出匹配的结果"""
+    scripts = [s for s in scripts if s.get('text')]
+    voice_table = [v for v in voice_table if v.get('text')]
+    script_slide_iterators = [scripts[i:] for i in range(3)]
+    voice_table_slide_iterators = [voice_table[i:] for i in range(3)]
+    script_id_map = {script['script_id']: script for script in scripts}
+    voice_table_id_map = {voice['id']: voice for voice in voice_table}
+    script_context_map = {script_slide[0]['text'] + "||" + script_slide[1]['text'] + "||" + script_slide[2]['text']: script_slide for script_slide in zip(*script_slide_iterators)}
+    voice_table_context_map = {voice_slide[0]['text'] + "||" + voice_slide[1]['text'] + "||" + voice_slide[2]['text']: voice_slide for voice_slide in zip(*voice_table_slide_iterators)}
+    voice_table_context_match = {}
+    for voice_context, voice_slide in voice_table_context_map.items():
+        if voice_context in script_context_map:
+            matched_pairs = zip(voice_slide, script_context_map[voice_context])
+            for voice, script in matched_pairs:
+                voice_table_context_match[voice['id']] = script['script_id']
+    
+    voice_table_context_match_stage1 = [(voice['id'], voice_table_context_match.get(voice['id'],None)) for voice in voice_table]
+    for voice_id, script_id in voice_table_context_match_stage1:
+        if script_id is not None:
+            logger.info(f"{voice_id}: {script_id} | {script_id_map[script_id]['voice_id']}")
+        else:
+            logger.info(f"{voice_id}: None")
+    
+    def find_none_blocks(matched_items):
+        """Find continuous subranges of None values in a list of matched items."""
+        match_margins = []
+        in_none_block = False
+        start_index = -1
+        
+        for i, (_, script_id) in enumerate(matched_items):
+            if script_id is None and not in_none_block:
+                in_none_block = True
+                start_index = i
+            elif script_id is not None and in_none_block:
+                in_none_block = False
+                match_margins.append((start_index, i - 1))
+
+        if in_none_block:
+            match_margins.append((start_index, len(matched_items) - 1))
+
+        # For each margin, find the hints
+        margin_hints = []
+        for start, end in match_margins:
+            hint_before = matched_items[start - 1] if start > 0 else None
+            hint_after = matched_items[end + 1] if end < len(matched_items) - 1 else None
+            if hint_before is not None and hint_after is not None:
+                margin_hints.append({
+                'range': (start, end),
+                'hint_before': hint_before,
+                'hint_after': hint_after
+            })
+            
+        return match_margins, margin_hints
+
+    context_match_margins_stage1, script_margin_hints = find_none_blocks(voice_table_context_match_stage1)
+
+
+    script_margin_hint_match = {}
+    for margin_hint in script_margin_hints :
+        start_idx, end_idx = margin_hint['range']
+        hint_before, hint_after = margin_hint['hint_before'], margin_hint['hint_after']
+        if end_idx - start_idx + 1 == (hint_after[1] - 1) - (hint_before[1] + 1) + 1:
+            logger.info(f"Found continuous margin: {margin_hint}")
+            for idx in range(start_idx, end_idx + 1):
+                predicate_script_id = hint_before[1]+1 + (idx - start_idx)
+                if predicate_script_id not in script_id_map:
+                    logger.info(f"Mapping {voice_table_context_match_stage1[idx][0]} to None | Skipped")
+                    continue
+                logger.info(f"Mapping {voice_table_context_match_stage1[idx][0]} to {predicate_script_id} | {script_id_map[predicate_script_id]['voice_id']}")
+                script_margin_hint_match[voice_table_context_match_stage1[idx][0]] = predicate_script_id
+
+    voice_table_context_match.update(script_margin_hint_match)
+    voice_table_context_match_stage2 = [(voice['id'], voice_table_context_match.get(voice['id'], None)) for voice in voice_table]
+    
+    context_match_margins_stage2, voice_margin_hints= find_none_blocks(voice_table_context_match_stage2)
+
+    def get_old_voice_scene_order(old_voice_id):
+        return int(old_voice_id[3:10])
+
+    old_voice_scene_order_to_entry_map = {get_old_voice_scene_order(old_voice_id): old_voice_entry for old_voice_id, old_voice_entry in old_voice_id_to_entry_map.items()}
+
+    voice_margin_hint_match = {}
+    for margin_hint in voice_margin_hints :
+        start_match_idx, end_match_idx = margin_hint['range']
+        hint_before, hint_after = margin_hint['hint_before'], margin_hint['hint_after']
+        hint_before_old_voice_id, hint_after_old_voice_id = script_id_map[hint_before[1]].get('voice_id'), script_id_map[hint_after[1]].get('voice_id')
+        hint_before_old_voice_scene_order = get_old_voice_scene_order(hint_before_old_voice_id)
+        hint_after_old_voice_scene_order = get_old_voice_scene_order(hint_after_old_voice_id)
+        if (hint_after_old_voice_scene_order - 1) - (hint_before_old_voice_scene_order + 1) + 1 == end_match_idx - start_match_idx + 1:
+            is_all_has_voice = True
+            for idx in range(start_match_idx, end_match_idx + 1):
+                if old_voice_scene_order_to_entry_map.get(hint_before_old_voice_scene_order + 1 + idx - start_match_idx) is None:
+                    is_all_has_voice = False
+                    break
+            if is_all_has_voice:
+                logger.info(f"Found continuous margin: {margin_hint}")
+                for idx in range(start_match_idx, end_match_idx + 1):
+                    logger.info(f"Mapping {voice_table_context_match_stage2[idx][0]} to {old_voice_scene_order_to_entry_map[hint_before_old_voice_scene_order + idx - start_match_idx]['script_id']} | {old_voice_scene_order_to_entry_map[hint_before_old_voice_scene_order + idx - start_match_idx]['voice_id']}")
+                    voice_table_context_match[voice_table_context_match_stage2[idx][0]] = old_voice_scene_order_to_entry_map[hint_before_old_voice_scene_order + idx - start_match_idx]['script_id']
+                
+    voice_table_context_match.update(voice_margin_hint_match)    
+    voice_table_context_match_to_old_voice_id = {id: old_voice_id_to_entry_map[script_id_map[script_id]['voice_id']] for id, script_id in voice_table_context_match.items()}
+
+    return voice_table_context_match_to_old_voice_id
+
 def create_silent_wav(path, duration_ms=100):
     """
     Creates a silent WAV file.
@@ -239,6 +350,7 @@ def main():
 
     # 为新语音数据添加上下文
     logger.info("正在为新语音数据添加上下文...")
+    new_data_unsorted = new_data.copy()
     # 根据 'id' 字段排序以确保对话顺序
     new_data.sort(key=lambda x: x.get('id', ''))
     for i, entry in enumerate(new_data):
@@ -344,6 +456,7 @@ def main():
 
     matched_data = []
     unmatched_data = []
+    skipped_data = []
     used_old_voice_ids = set() # 用于跟踪已匹配的旧语音ID
     
     total_count = len(new_data)
@@ -378,6 +491,13 @@ def main():
             entries_to_process.append(new_entry)
         else:
             reason = f"类别 '{category or file_type}' 未被命令行选项启用或角色ID不匹配"
+            skipped_data.append({
+                'new_voice_id': new_entry['id'],
+                'new_filename': new_entry['filename'],
+                'classification': classification,
+                'text': new_entry['text'],
+                'reason': reason,
+            })
             logger.info(f"跳过 {new_entry['filename']}: {reason}")
 
     processed_count = len(entries_to_process)
@@ -387,8 +507,10 @@ def main():
     logger.info("\n--- 第一遍: 执行精确匹配和标准化匹配 ---")
     remaining_entries_pass2 = []
     pass1_success_count = 0
+    blockwise_match_result = blockwise_match(old_script_list, entries_to_process, old_voice_id_to_entry_map)
     for new_entry in entries_to_process:
-        best_match, match_type = find_best_match(new_entry, old_data_map, old_data_normalized_map, old_script_list, model, old_embeddings, args, used_old_voice_ids, methods=['exact', 'normalized'])
+        match_type = "exact"
+        best_match = blockwise_match_result.get(new_entry.get('id'))
 
         if best_match:
             pass1_success_count += 1
@@ -399,6 +521,7 @@ def main():
                 'new_filename': new_entry.get('filename'),
                 'new_text': new_entry['text'],
                 'old_voice_id': best_match.get('voice_id'),
+                'old_script_id': best_match.get('script_id'),
                 'old_scene_id': best_match.get('scene_id'),
                 'old_scene_seq_id': best_match.get('scene_seq_id'),
                 'old_text': best_match.get('text'),
@@ -411,76 +534,7 @@ def main():
             remaining_entries_pass2.append(new_entry)
     logger.info(f"第一遍完成: 成功匹配 {pass1_success_count} 条。")
 
-    # --- Context Verification Pass ---
-    logger.info("\n--- 上下文验证: 检查已匹配项的上下文一致性 ---")
-    new_id_to_match_map = {m['new_voice_id']: m for m in matched_data}
-    new_id_to_new_entry_map = {e['id']: e for e in new_data} # Assumes new_data is sorted by id
-
-    confirmed_matches = []
-    entries_for_rematch = []
     reverted_count = 0
-
-    for match in matched_data:
-        new_id = match['new_voice_id']
-        scene_id = match.get('old_scene_id')
-        scene_seq_id = match.get('old_scene_seq_id')
-
-        if scene_id is None or scene_seq_id is None: # Skip if no scene info
-            confirmed_matches.append(match)
-            continue
-
-        # --- Check previous voice context ---
-        prev_new_entry = new_id_to_new_entry_map.get(new_id - 1)
-        prev_match = new_id_to_match_map.get(new_id - 1) if prev_new_entry else None
-        
-        # Context is OK if: 1. No previous entry. 2. Prev entry is not in the same scene. 3. Prev entry is sequential.
-        prev_context_ok = (prev_new_entry is None) or \
-                          (prev_match and (
-                              prev_match.get('old_scene_id') != scene_id or \
-                              prev_match.get('old_scene_seq_id') == scene_seq_id - 1
-                          ))
-
-        # --- Check next voice context ---
-        next_new_entry = new_id_to_new_entry_map.get(new_id + 1)
-        next_match = new_id_to_match_map.get(new_id + 1) if next_new_entry else None
-
-        # Context is OK if: 1. No next entry. 2. Next entry is not in the same scene. 3. Next entry is sequential.
-        next_context_ok = (next_new_entry is None) or \
-                          (next_match and (
-                              next_match.get('old_scene_id') != scene_id or \
-                              next_match.get('old_scene_seq_id') == scene_seq_id + 1
-                          ))
-
-        inside_context_ok = (next_new_entry is None or prev_new_entry is None or next_match is None or prev_match is None or next_match is None or next_match.get('old_scene_id') != prev_match.get('old_scene_id')) or \
-            (prev_match.get('old_scene_seq_id') <= scene_seq_id <= next_match.get('old_scene_seq_id'))
-
-        if prev_context_ok and next_context_ok and inside_context_ok:
-            confirmed_matches.append(match)
-        else:
-            # 仅当候选项不唯一（0或>=2）时，才考虑撤销
-            new_text = match['new_text']
-            normalized_new_text = normalize_text(new_text)
-            # 检查精确匹配和标准化匹配的候选项数量
-            num_candidates = len(old_data_map.get(new_text, [])) or len(old_data_normalized_map.get(normalized_new_text, []))
-
-            if num_candidates == 1:
-                # 如果只有一个候选项，我们相信这个匹配是正确的，不撤销
-                confirmed_matches.append(match)
-                logger.debug(f"  - 保留匹配 (唯一候选项): New ID {match['new_voice_id']} ({match['new_text']})")
-            else:
-                # Revert match and send for re-matching
-                logger.debug(f"  - 撤销匹配: New ID {match['new_voice_id']} ({match['new_text']}) <-> Old ID {match['old_voice_id']} ({match['old_text']})")
-                reverted_count += 1
-                original_new_entry = new_id_to_new_entry_map.get(new_id)
-                if original_new_entry:
-                    entries_for_rematch.append(original_new_entry)
-                # Also remove the used old voice ID to make it available again
-                used_old_voice_ids.remove(match['old_voice_id'])
-
-    logger.info(f"上下文验证完成: {reverted_count} 条因上下文不一致被撤销，将重新匹配。")
-    matched_data = confirmed_matches
-    # Combine Pass 1 failures with reverted entries for the next passes
-    remaining_entries_pass2.extend(entries_for_rematch)
     remaining_entries_pass2.sort(key=lambda x: x['id'])
 
     # --- Pass 2: Contextual Matching for Ambiguous Entries ---
@@ -514,6 +568,7 @@ def main():
                         'new_filename': new_entry.get('filename'),
                         'new_text': new_entry['text'],
                         'old_voice_id': candidate.get('voice_id'),
+                        'old_script_id': candidate.get('script_id'),
                         'old_scene_id': candidate.get('scene_id'),
                         'old_scene_seq_id': candidate.get('scene_seq_id'),
                         'old_text': candidate.get('text'),
@@ -551,6 +606,7 @@ def main():
                 'new_filename': new_entry.get('filename'),
                 'new_text': new_entry['text'],
                 'old_voice_id': best_match.get('voice_id'),
+                'old_script_id': best_match.get('script_id'),
                 'old_scene_id': best_match.get('scene_id'),
                 'old_scene_seq_id': best_match.get('scene_seq_id'),
                 'old_text': best_match.get('text'),
@@ -563,6 +619,7 @@ def main():
             unmatched_data.append({
                 'new_voice_id': new_entry.get('id'),
                 'new_filename': new_entry.get('filename'),
+                'classification': classification,
                 'text': new_entry['text']
             })
     logger.info(f"第三遍完成: 成功匹配 {pass3_success_count} 条。")
@@ -579,6 +636,65 @@ def main():
     
     with open(UNMATCHED_OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(unmatched_data, f, ensure_ascii=False, indent=4)
+    
+    with open(SKIPPED_OUTPUT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(skipped_data, f, ensure_ascii=False, indent=4)
+
+    matched_data_new_voice_id_map = {entry['new_voice_id']: entry for entry in matched_data}
+    unmatched_data_new_voice_id_map = {entry['new_voice_id']: entry for entry in unmatched_data}
+    skipped_data_new_voice_id_map = {entry['new_voice_id']: entry for entry in skipped_data}
+    with open(MATCH_RESULT_CSV, 'w', encoding='utf-8', newline='\n') as f:
+        writer = csv.writer(f)
+        writer.writerow(['RemakeVoiceID', 'RemakeVoiceFilename', 'OldScriptId', 'OldVoiceFilename', 'MatchType', 'RemakeVoiceType', 'RemakeVoiceCharacterId', 'RemakeVoiceCategory', 'RemakeVoiceOrderPerCharacter', 'RemakeVoiceText', 'OldVoiceText'])
+        rows_to_write = []
+        for new_voice_entry in new_data_unsorted:
+            matched_entry = matched_data_new_voice_id_map.get(new_voice_entry['id'])
+            if matched_entry:
+                rows_to_write.append([
+                    new_voice_entry['id'],
+                    new_voice_entry['filename'],
+                    matched_entry['old_script_id'],
+                    "ch" + matched_entry['old_voice_id'][:-1],
+                    matched_entry['match_type'],
+                    matched_entry['classification']['type'],
+                    matched_entry['classification']['character_id'],
+                    matched_entry['classification']['category'],
+                    matched_entry['classification']['number'],
+                    matched_entry['new_text'],
+                    matched_entry['old_text']
+                ])
+            else  :
+                unmatched_entry = unmatched_data_new_voice_id_map.get(new_voice_entry['id'])
+                if unmatched_entry:
+                    rows_to_write.append([
+                        unmatched_entry['new_voice_id'],
+                        unmatched_entry['new_filename'],
+                        '',
+                        '',
+                        'unmatched',
+                        unmatched_entry['classification']['type'],
+                        unmatched_entry['classification']['character_id'],
+                        unmatched_entry['classification']['category'],
+                        unmatched_entry['classification']['number'],
+                        unmatched_entry['text'],
+                        ''
+                    ])
+                else:
+                    skipped_entry = skipped_data_new_voice_id_map.get(new_voice_entry['id'])
+                    rows_to_write.append([
+                        skipped_entry['new_voice_id'],
+                        skipped_entry['new_filename'],
+                        '',
+                        '',
+                        'skipped',
+                        skipped_entry['classification']['type'],
+                        skipped_entry['classification'].get('description', ''),
+                        skipped_entry['classification'].get('category', ''),
+                        skipped_entry['classification'].get('number', ''),
+                        skipped_entry['text'],
+                        ''
+                    ])
+        writer.writerows(rows_to_write)
 
     # --- 更新 t_voice.json ---
     logger.info("\n正在将匹配结果应用到新的 t_voice.json...")
@@ -635,6 +751,8 @@ def main():
     logger.info(f"失败: {processed_count - success_count}")
     logger.info(f"成功匹配的数据已保存到: {MERGED_OUTPUT_FILE}")
     logger.info(f"未匹配的数据已保存到: {UNMATCHED_OUTPUT_FILE}")
+    logger.info(f"跳过匹配的数据已保存到: {SKIPPED_OUTPUT_FILE}")
+    logger.info(f"匹配结果已保存到: {MATCH_RESULT_CSV}")
 
 if __name__ == '__main__':
     main()

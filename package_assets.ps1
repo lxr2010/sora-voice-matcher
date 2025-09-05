@@ -14,6 +14,11 @@
     .\package_assets.ps1
 #>
 
+param(
+    [Parameter(Mandatory=$false, HelpMessage="Additionally process the voice assets.")]
+    [switch]$IncludeVoice
+)
+
 # --- Configuration ---
 $ErrorActionPreference = 'Stop'
 $scriptRoot = $PSScriptRoot
@@ -24,126 +29,101 @@ $createPacScript = Join-Path -Path $scriptRoot -ChildPath "kuro_mdl_tool\misc\cr
 
 # Source paths
 $sourceJson = Join-Path -Path $scriptRoot -ChildPath "output\t_voice.json"
-$sourceTableScDir = Join-Path -Path $scriptRoot -ChildPath "kuro_mdl_tool\misc\table_sc"
-$sourceVoiceDir = Join-Path -Path $scriptRoot -ChildPath "kuro_mdl_tool\misc\voice"
 $newVoicesDir = Join-Path -Path $scriptRoot -ChildPath "voice" # Converted Evo voices
 
 # Output and temporary paths
 $outputDir = Join-Path -Path $scriptRoot -ChildPath "output"
-$tempPackagingDir = Join-Path -Path $outputDir -ChildPath "packaging_temp"
-$tempTableScDir = Join-Path -Path $tempPackagingDir -ChildPath "table_sc"
-$tempVoiceDir = Join-Path -Path $tempPackagingDir -ChildPath "voice"
+$tempJson = Join-Path -Path $scriptRoot -ChildPath "KuroTools v1.3\scripts&tables\t_voice_new.json"
+$tmpTbl = Join-Path -Path $scriptRoot -ChildPath "KuroTools v1.3\scripts&tables\t_voice_new.tbl"
+$outputTableScDir = Join-Path -Path $scriptRoot -ChildPath "kuro_mdl_tool\misc\table_sc"
+$outputVoiceDir = Join-Path -Path $scriptRoot -ChildPath "kuro_mdl_tool\misc\voice"
+$outputTableScPac = Join-Path -Path $scriptRoot -ChildPath "output\table_sc.pac"
+$outputVoicePac = Join-Path -Path $scriptRoot -ChildPath "output\voice.pac"
 
 # --- Main Script ---
+$originalLocation = Get-Location
 
-# 1. Convert t_voice.json to t_voice.tbl
-Write-Host "Step 1: Converting t_voice.json to t_voice.tbl..."
-if (-not (Test-Path $sourceJson)) {
-    Write-Error "Source file not found: $sourceJson. Please run the matching script first."
+Write-Host "--- Processing table_sc assets (Default) ---"
+
+# Step 1: Copy $sourceJson to $tempJson
+Write-Host "Step 1: Copying t_voice.json for processing..."
+if (-not (Test-Path -Path $sourceJson)) {
+    Write-Error "Source JSON file not found: $sourceJson"
     exit 1
 }
-try {
-    $toolDir = Split-Path -Path $json2TblScript -Parent
-    Push-Location -Path $toolDir
+Copy-Item -Path $sourceJson -Destination $tempJson -Force
+Write-Host "Successfully copied t_voice.json."
 
-    # Use absolute path for source json as we are in a different directory
-    uv run python (Split-Path -Path $json2TblScript -Leaf) "$sourceJson"
-    
-    $generatedTblInToolDir = Join-Path -Path $toolDir -ChildPath "t_voice.tbl"
-    $generatedTblInOutputDir = Join-Path -Path $outputDir -ChildPath "t_voice.tbl"
+# Step 2: Convert $tempJson to $tmpTbl
+Write-Host "Step 2: Converting JSON to TBL..."
+if (-not (Test-Path -Path $json2TblScript)) {
+    Write-Error "json2tbl.py script not found: $json2TblScript"
+    exit 1
+}
+Set-Location -Path (Split-Path -Path $json2TblScript -Parent)
+uv run python (Split-Path -Path $json2TblScript -Leaf) (Split-Path -Path $tempJson -Leaf)
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to convert JSON to TBL."
+    Set-Location -Path $originalLocation
+    exit 1
+}
+Set-Location -Path $originalLocation
+Write-Host "Successfully converted JSON to TBL."
 
-    if (-not (Test-Path $generatedTblInToolDir)) {
-        Write-Error "Failed to generate t_voice.tbl. Check for errors from json2tbl.py."
-        Pop-Location
+# Step 3: Copy $tmpTbl to $outputDir
+Write-Host "Step 3: Copying TBL to output directory..."
+Copy-Item -Path $tmpTbl -Destination (Join-Path -Path $outputDir -ChildPath "t_voice.tbl") -Force
+Write-Host "Successfully copied TBL file."
+
+# Step 4: Copy $tmpTbl to $outputTableScDir, replacing the old t_voice.tbl
+Write-Host "Step 4: Updating table_sc with new TBL file..."
+Copy-Item -Path $tmpTbl -Destination (Join-Path -Path $outputTableScDir -ChildPath "t_voice.tbl") -Force
+Write-Host "Successfully updated table_sc."
+
+# Step 5 & 6: Create and move table_sc.pac
+Write-Host "Step 5 & 6: Packaging table_sc directory..."
+Set-Location -Path (Split-Path -Path $createPacScript -Parent)
+uv run python (Split-Path -Path $createPacScript -Leaf) "table_sc" -o
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to package table_sc directory."
+    Set-Location -Path $originalLocation
+    exit 1
+}
+Move-Item -Path (Join-Path -Path (Split-Path -Path $createPacScript -Parent) -ChildPath "table_sc.pac") -Destination $outputTableScPac -Force
+Set-Location -Path $originalLocation
+Write-Host "Successfully packaged and moved table_sc.pac."
+
+if ($IncludeVoice.IsPresent) {
+    Write-Host "--- Processing voice assets (Optional) ---"
+
+    # Optional Step a.1: Copy new voices
+    Write-Host "Optional Step a.1: Merging new voice files..."
+    $newVoicesWavDir = Join-Path -Path $newVoicesDir -ChildPath "wav"
+    $outputVoiceWavDir = Join-Path -Path $outputVoiceDir -ChildPath "wav"
+    if (Test-Path -Path $newVoicesWavDir) {
+        Copy-Item -Path "$newVoicesWavDir\*" -Destination $outputVoiceWavDir -Recurse -Force
+        Write-Host "New voice files merged."
+    } else {
+        Write-Host "No new voice files found to merge."
+    }
+
+    # Optional Step a.2: Create and move voice.pac
+    Write-Host "Optional Step a.2: Packaging voice directory..."
+    Set-Location -Path (Split-Path -Path $createPacScript -Parent)
+    uv run python (Split-Path -Path $createPacScript -Leaf) "voice" -o
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to package voice directory."
+        Set-Location -Path $originalLocation
         exit 1
     }
-    
-    Move-Item -Path $generatedTblInToolDir -Destination $generatedTblInOutputDir -Force
-    Pop-Location
-    Write-Host "t_voice.tbl generated successfully." -ForegroundColor Green
-} catch {
-    Write-Error "An error occurred while running json2tbl.py. Please check your Python environment and script paths."
-    Pop-Location
-    exit 1
+    Move-Item -Path (Join-Path -Path (Split-Path -Path $createPacScript -Parent) -ChildPath "voice.pac") -Destination $outputVoicePac -Force
+    Set-Location -Path $originalLocation
+    Write-Host "Successfully packaged and moved voice.pac."
 }
 
-# 2. Prepare temporary packaging directory
-Write-Host "`nStep 2: Preparing temporary packaging directory..."
-if (Test-Path $tempPackagingDir) {
-    Write-Host "Cleaning up old temporary directory..."
-    Remove-Item -Path $tempPackagingDir -Recurse -Force
-}
-New-Item -Path $tempPackagingDir -ItemType Directory | Out-Null
+# Cleanup
+Write-Host "Cleaning up temporary files..."
+Remove-Item -Path $tempJson -Force
+Remove-Item -Path $tmpTbl -Force
 
-Write-Host "Copying original 'table_sc' and 'voice' assets..."
-# Create the target directories first
-New-Item -Path $tempTableScDir -ItemType Directory -Force | Out-Null
-New-Item -Path $tempVoiceDir -ItemType Directory -Force | Out-Null
-
-# Copy the contents of source directories to the temporary directories
-Copy-Item -Path "$sourceTableScDir\*" -Destination $tempTableScDir -Recurse
-Copy-Item -Path "$sourceVoiceDir\*" -Destination $tempVoiceDir -Recurse
-
-# 3. Update assets in temporary directory
-Write-Host "`nStep 3: Updating assets with new voice data..."
-# Replace t_voice.tbl
-Write-Host "Replacing t_voice.tbl..."
-Move-Item -Path $generatedTblInOutputDir -Destination (Join-Path -Path $tempTableScDir -ChildPath "t_voice.tbl") -Force
-
-# Merge new voice files
-Write-Host "Merging new .wav files..."
-if (Test-Path $newVoicesDir) {
-    Copy-Item -Path "$newVoicesDir\*" -Destination $tempVoiceDir -Recurse -Force
-    Write-Host "New voices merged."
-} else {
-    Write-Warning "Directory with new voices not found: $newVoicesDir. Continuing without merging new voices."
-}
-
-# 4. Repackage .pac files
-Write-Host "`nStep 4: Repackaging .pac files..."
-
-$toolDir = Split-Path -Path $createPacScript -Parent
-Push-Location -Path $toolDir
-
-try {
-    # Repackage table_sc.pac
-    Write-Host "Creating table_sc.pac..."
-    uv run python (Split-Path -Path $createPacScript -Leaf) "$tempTableScDir" -o
-    $generatedTablePacInToolDir = Join-Path -Path $toolDir -ChildPath "table_sc.pac"
-    Move-Item -Path $generatedTablePacInToolDir -Destination $outputDir -Force
-    Write-Host "table_sc.pac created successfully." -ForegroundColor Green
-
-    # Repackage voice.pac
-    Write-Host "Creating voice.pac..."
-    uv run python (Split-Path -Path $createPacScript -Leaf) "$tempVoiceDir" -o -a "voice_new.pac"
-    $generatedVoicePacInToolDir = Join-Path -Path $toolDir -ChildPath "voice_new.pac"
-    
-    # Check if voice.pac file exists and print file information
-    if (Test-Path -Path $generatedVoicePacInToolDir) {
-        $fileInfo = Get-Item -Path $generatedVoicePacInToolDir
-        $fileSizeMB = [math]::Round($fileInfo.Length / 1MB, 2)
-        
-        Write-Host "Voice.pac file generated:" -ForegroundColor Cyan
-        Write-Host "  - Path: $($fileInfo.FullName)" -ForegroundColor Cyan
-        Write-Host "  - Size: ${fileSizeMB} MB" -ForegroundColor Cyan
-        Write-Host "  - Created: $($fileInfo.CreationTime)" -ForegroundColor Cyan
-        
-        # Move the file to output directory
-        Copy-Item -Path $generatedVoicePacInToolDir -Destination "$outputDir/voice.pac" -Force
-        Write-Host "voice.pac created successfully." -ForegroundColor Green
-    } else {
-        Write-Warning "Warning: voice.pac file was not generated!"
-    }
-} catch {
-    Write-Error "An error occurred during .pac file creation: $_"
-} finally {
-    Pop-Location
-}
-
-# 5. Clean up
-Write-Host "`nStep 5: Cleaning up temporary files..."
-Remove-Item -Path $tempPackagingDir -Recurse -Force
-Write-Host "Cleanup complete."
-
-Write-Host "`n--- Packaging Complete! ---" -ForegroundColor Cyan
-Write-Host "The final files 'table_sc.pac' and 'voice.pac' are in the '$outputDir' directory."
+Write-Host "Asset packaging process completed successfully!"

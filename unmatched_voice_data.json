@@ -2,461 +2,1904 @@
     {
         "new_voice_id": 49005,
         "new_filename": "v002_04_0639b",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0257"
+        },
         "text": "自分の忌まわしい本性を思い知らされるようになったから……"
     },
     {
         "new_voice_id": 49004,
         "new_filename": "v013_04_0174b",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0257"
+        },
         "text": "早く行け！！"
     },
     {
         "new_voice_id": 49003,
         "new_filename": "v013_04_0180b",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0257"
+        },
         "text": "後悔だけは……せずにすむ……"
+    },
+    {
+        "new_voice_id": 49002,
+        "new_filename": "v132_04_9000",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0257"
+        },
+        "text": "そのショックで身体が言うことを聞かなくなったみたいだ……"
+    },
+    {
+        "new_voice_id": 49001,
+        "new_filename": "v013_04_9000",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0257"
+        },
+        "text": "はは、伊達に情報部を名乗っているつもりはないよ。"
     },
     {
         "new_voice_id": 47257,
         "new_filename": "v001_04_0593",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0594"
+        },
         "text": "そもそも《輝く環（オーリオール）》って何！？"
     },
     {
         "new_voice_id": 47254,
         "new_filename": "v002_04_0419",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0118"
+        },
         "text": "今なら……まだ間に合います。"
     },
     {
         "new_voice_id": 47253,
         "new_filename": "v002_04_0418",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0118"
+        },
         "text": "まだ《ゴスペル》は稼働させてないみたいですね。"
     },
     {
         "new_voice_id": 47252,
         "new_filename": "v001_04_0591",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0118"
+        },
         "text": "あたしたち、女王様に頼まれてあなたの計画を止めに来たわ。"
     },
     {
         "new_voice_id": 47251,
         "new_filename": "v001_04_0590",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0118"
+        },
         "text": "リシャール大佐……"
     },
     {
         "new_voice_id": 47250,
         "new_filename": "v013_04_0117",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0118"
+        },
         "text": "何となく君たちが来るのではないかと思ったよ。"
     },
     {
         "new_voice_id": 47249,
         "new_filename": "v013_04_0116",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0118"
+        },
         "text": "……やはり来たか。"
+    },
+    {
+        "new_voice_id": 46833,
+        "new_filename": "v003_04_0044",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0537"
+        },
+        "text": "ぶつかったショックで気絶してるだけだから大丈夫。"
     },
     {
         "new_voice_id": 46832,
         "new_filename": "v001_04_0515",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0537"
+        },
         "text": "あ、フィリップさん！"
     },
     {
         "new_voice_id": 46679,
         "new_filename": "v008_04_0174",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "006",
+            "category": "main",
+            "number": "0081"
+        },
         "text": "イエス・マム！"
     },
     {
         "new_voice_id": 46678,
         "new_filename": "v003_04_0022",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "006",
+            "category": "main",
+            "number": "0081"
+        },
         "text": "イエス・マム！"
     },
     {
         "new_voice_id": 46677,
         "new_filename": "v004_04_0151",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "006",
+            "category": "main",
+            "number": "0081"
+        },
         "text": "イエス・マム！"
     },
     {
         "new_voice_id": 46676,
         "new_filename": "v002_04_0359",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "006",
+            "category": "main",
+            "number": "0081"
+        },
         "text": "イエス・マム！"
     },
     {
-        "new_voice_id": 46675,
-        "new_filename": "v001_04_0496",
-        "text": "イエス・マム！"
+        "new_voice_id": 46298,
+        "new_filename": "v132_04_0056",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "262",
+            "category": "main",
+            "number": "0012"
+        },
+        "text": "わかった……恩に着る！"
     },
     {
-        "new_voice_id": 46645,
-        "new_filename": "v263_04_0008",
-        "text": "イエス・マム！"
+        "new_voice_id": 46296,
+        "new_filename": "v132_04_0054",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "132",
+            "category": "main",
+            "number": "0055"
+        },
+        "text": "ああ、記憶を取り戻して逆に身体が軽くなったくらいさ。"
     },
     {
-        "new_voice_id": 46403,
-        "new_filename": "v002_04_0331",
-        "text": "了解です！"
+        "new_voice_id": 46277,
+        "new_filename": "v132_04_0035",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "132",
+            "category": "main",
+            "number": "0036"
+        },
+        "text": "全部ではないが……ようやく思い出すことができた。"
     },
     {
         "new_voice_id": 46263,
         "new_filename": "v132_04_0025",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "132",
+            "category": "main",
+            "number": "0026"
+        },
         "text": "…………………………"
+    },
+    {
+        "new_voice_id": 46262,
+        "new_filename": "v132_04_0024",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "132",
+            "category": "main",
+            "number": "0026"
+        },
+        "text": "とんでもない依頼……？"
+    },
+    {
+        "new_voice_id": 46251,
+        "new_filename": "v133_04_0020",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "133",
+            "category": "main",
+            "number": "0021"
+        },
+        "text": "………………え。"
     },
     {
         "new_voice_id": 46227,
         "new_filename": "v263_04_0005",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "135",
+            "category": "main",
+            "number": "0017"
+        },
         "text": "リベールの栄光のために！"
     },
     {
         "new_voice_id": 46117,
         "new_filename": "v008_04_0107",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "008",
+            "category": "main",
+            "number": "0108"
+        },
         "text": "おお～！エステル、ヨシュア！"
     },
     {
-        "new_voice_id": 46036,
-        "new_filename": "v139_04_0009",
-        "text": "おや……？"
+        "new_voice_id": 46113,
+        "new_filename": "v014_04_0049",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "008",
+            "category": "main",
+            "number": "0108"
+        },
+        "text": "……こんな時間に何をしてらっしゃるのかしら？"
+    },
+    {
+        "new_voice_id": 46078,
+        "new_filename": "v138_04_0090",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "008",
+            "category": "main",
+            "number": "0108"
+        },
+        "text": "うい～……そうだ、ドロシーとやら。"
+    },
+    {
+        "new_voice_id": 46077,
+        "new_filename": "v138_04_0089",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "008",
+            "category": "main",
+            "number": "0108"
+        },
+        "text": "うい～……そうだ、シェラとやら。"
+    },
+    {
+        "new_voice_id": 46014,
+        "new_filename": "v002_04_0293",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "002",
+            "category": "main",
+            "number": "0294"
+        },
+        "text": "……カリンと申します。"
+    },
+    {
+        "new_voice_id": 46013,
+        "new_filename": "v001_04_0380",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "002",
+            "category": "main",
+            "number": "0294"
+        },
+        "text": "（そりゃそうかもね……）"
+    },
+    {
+        "new_voice_id": 46001,
+        "new_filename": "v137_04_0067",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "137",
+            "category": "main",
+            "number": "0068"
+        },
+        "text": "ええ、そうさせて頂きます。"
+    },
+    {
+        "new_voice_id": 45667,
+        "new_filename": "v013_04_0102",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0103"
+        },
+        "text": "……これで未練は無くなったよ。"
+    },
+    {
+        "new_voice_id": 45664,
+        "new_filename": "v013_04_0099",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0100"
+        },
+        "text": "さてと……付き合ってくれてありがとう。"
+    },
+    {
+        "new_voice_id": 45629,
+        "new_filename": "v013_04_0070",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0094"
+        },
+        "text": "君たちとは、前から一度、個人的に話をしてみたかったのだ。"
     },
     {
         "new_voice_id": 45620,
         "new_filename": "v013_04_0061",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "013",
+            "category": "main",
+            "number": "0062"
+        },
         "text": "おや、君たちは……"
     },
     {
         "new_voice_id": 45475,
         "new_filename": "v137_04_0016",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "137",
+            "category": "main",
+            "number": "0017"
+        },
         "text": "おや……"
-    },
-    {
-        "new_voice_id": 45467,
-        "new_filename": "v137_04_0008",
-        "text": "……その事は聞き飽きました。"
     },
     {
         "new_voice_id": 45460,
         "new_filename": "v137_04_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "137",
+            "category": "main",
+            "number": "0002"
+        },
         "text": "……こんな所で何をなさっているのですか？"
+    },
+    {
+        "new_voice_id": 45457,
+        "new_filename": "v127_04_0014",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "127",
+            "category": "main",
+            "number": "0015"
+        },
+        "text": "おお……エステル君、ヨシュア君！"
+    },
+    {
+        "new_voice_id": 45453,
+        "new_filename": "v123_04_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "127",
+            "category": "main",
+            "number": "0015"
+        },
+        "text": "フフ、久しぶりだのう。"
+    },
+    {
+        "new_voice_id": 44748,
+        "new_filename": "v103_04_0014",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "103",
+            "category": "main",
+            "number": "0015"
+        },
+        "text": "うん、なんだか大事な調べ物があるみたいでね～。"
+    },
+    {
+        "new_voice_id": 44729,
+        "new_filename": "v102_04_0013",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0017"
+        },
+        "text": "敵を知り、己を知れば百戦危うからずってヤツか。"
+    },
+    {
+        "new_voice_id": 44728,
+        "new_filename": "v102_04_0012",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0017"
+        },
+        "text": "情報部員の経歴だと……？"
+    },
+    {
+        "new_voice_id": 44727,
+        "new_filename": "v102_04_0011",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0017"
+        },
+        "text": "それは調べておくとして……他にはあるかよ？"
+    },
+    {
+        "new_voice_id": 44725,
+        "new_filename": "v102_04_0009",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0010"
+        },
+        "text": "それで、具体的にはどういう事が知りたいんだ？"
+    },
+    {
+        "new_voice_id": 44717,
+        "new_filename": "v102_04_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0002"
+        },
+        "text": "や～っと帰ってきやがったか。"
+    },
+    {
+        "new_voice_id": 44707,
+        "new_filename": "v242_04_0039",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "242",
+            "category": "main",
+            "number": "0040"
+        },
+        "text": "続きまして、第４試合のカードを発表させていただきます。"
+    },
+    {
+        "new_voice_id": 44691,
+        "new_filename": "v008_04_0058",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "242",
+            "category": "main",
+            "number": "0030"
+        },
+        "text": "胸を張って控室に戻るとしようや。"
+    },
+    {
+        "new_voice_id": 44518,
+        "new_filename": "v008_04_0027",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "120",
+            "category": "main",
+            "number": "0001"
+        },
+        "text": "あん、俺を？"
+    },
+    {
+        "new_voice_id": 44515,
+        "new_filename": "v008_04_0024",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "008",
+            "category": "main",
+            "number": "0025"
+        },
+        "text": "その時に、そう紹介されててな。"
+    },
+    {
+        "new_voice_id": 44511,
+        "new_filename": "v140_04_0045",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "008",
+            "category": "main",
+            "number": "0021"
+        },
+        "text": "あの、みなさん……本当にありがとうございました。"
+    },
+    {
+        "new_voice_id": 44509,
+        "new_filename": "v140_04_0043",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "140",
+            "category": "main",
+            "number": "0044"
+        },
+        "text": "え、で、でもわたくし……"
     },
     {
         "new_voice_id": 44474,
         "new_filename": "v140_04_0027",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "008",
+            "category": "main",
+            "number": "0002"
+        },
         "text": "………………………"
+    },
+    {
+        "new_voice_id": 44467,
+        "new_filename": "v140_04_0020",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "140",
+            "category": "main",
+            "number": "0021"
+        },
+        "text": "……いやああっ！"
+    },
+    {
+        "new_voice_id": 44440,
+        "new_filename": "v001_04_0064",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0072"
+        },
+        "text": "だ～から、なに自然な流れで付いてこようとしてんのよっ！？"
+    },
+    {
+        "new_voice_id": 44439,
+        "new_filename": "v004_04_0056",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0072"
+        },
+        "text": "フッ……早速、出かけてみるとしようか。"
+    },
+    {
+        "new_voice_id": 44438,
+        "new_filename": "v004_04_0055",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0072"
+        },
+        "text": "フッ……早速、行ってみるとしようか。"
+    },
+    {
+        "new_voice_id": 44436,
+        "new_filename": "v004_04_0053",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "004",
+            "category": "main",
+            "number": "0054"
+        },
+        "text": "ああ！あの熊のように大きな御仁か。"
+    },
+    {
+        "new_voice_id": 44435,
+        "new_filename": "v004_04_0052",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "004",
+            "category": "main",
+            "number": "0054"
+        },
+        "text": "へえ……いったい誰を捜してるんだい？"
+    },
+    {
+        "new_voice_id": 44428,
+        "new_filename": "v004_04_0045",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "004",
+            "category": "main",
+            "number": "0054"
+        },
+        "text": "ソンナ名前ノ　人ナンカミタコトモ　キイタコトモ　ナイヨ？"
+    },
+    {
+        "new_voice_id": 44427,
+        "new_filename": "v004_04_0044",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "004",
+            "category": "main",
+            "number": "0054"
+        },
+        "text": "……ハハハやだナア　えすてるクン？"
     },
     {
         "new_voice_id": 44426,
         "new_filename": "v004_04_0043",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "004",
+            "category": "main",
+            "number": "0054"
+        },
         "text": "ギクッ……"
     },
     {
         "new_voice_id": 44422,
         "new_filename": "v004_04_0039",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "004",
+            "category": "main",
+            "number": "0054"
+        },
         "text": "うーん、一月前くらいかな？"
+    },
+    {
+        "new_voice_id": 44275,
+        "new_filename": "v242_04_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "242",
+            "category": "main",
+            "number": "0002"
+        },
+        "text": "お待たせしました。これより第７試合を始めます。"
+    },
+    {
+        "new_voice_id": 44260,
+        "new_filename": "v131_04_0035",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "242",
+            "category": "main",
+            "number": "0002"
+        },
+        "text": "普段なら、協会の紹介状があれば取り次いでもらえるはずですが……"
     },
     {
         "new_voice_id": 44259,
         "new_filename": "v131_04_0034",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "242",
+            "category": "main",
+            "number": "0002"
+        },
         "text": "そうですね……"
+    },
+    {
+        "new_voice_id": 44247,
+        "new_filename": "v131_04_0022",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "131",
+            "category": "main",
+            "number": "0032"
+        },
+        "text": "………………………………"
+    },
+    {
+        "new_voice_id": 44232,
+        "new_filename": "v131_04_0007",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "131",
+            "category": "main",
+            "number": "0008"
+        },
+        "text": "私はエルナン。グランセル支部を任されています。"
     },
     {
         "new_voice_id": 44222,
         "new_filename": "v133_04_0004",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "133",
+            "category": "main",
+            "number": "0005"
+        },
         "text": "ふふっ、久しぶりだね、エステルちゃんにヨシュア君も！"
     },
     {
         "new_voice_id": 44221,
         "new_filename": "v133_04_0003",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "133",
+            "category": "main",
+            "number": "0005"
+        },
         "text": "シェラ先輩から聞いていたけどエステルちゃんにヨシュア君、だったっけ？"
     },
     {
         "new_voice_id": 44220,
         "new_filename": "v133_04_0002",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "133",
+            "category": "main",
+            "number": "0005"
+        },
         "text": "あ、カシウスさんのお子さんっていう！"
+    },
+    {
+        "new_voice_id": 44169,
+        "new_filename": "v011_04_0003",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "011",
+            "category": "main",
+            "number": "0004"
+        },
+        "text": "通行手続が済んだのであればさっそく王都に向かいましょうか？"
     },
     {
         "new_voice_id": 43004,
         "new_filename": "v001_02_0083",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0063"
+        },
         "text": "もちろん、あ～ん❤"
     },
     {
         "new_voice_id": 43002,
         "new_filename": "v002_01_0046",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0274"
+        },
         "text": "僕の胸でよかったらいくらでも貸してあげるから。"
     },
     {
         "new_voice_id": 43001,
         "new_filename": "v002_00_0229",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0274"
+        },
         "text": "そんな恥ずかしいセリフ、よくさらっと言えるもんだね。"
     },
     {
         "new_voice_id": 42767,
         "new_filename": "v001_03_0639",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0640"
+        },
         "text": "ひゃぁああ～～～っ！"
     },
     {
         "new_voice_id": 42682,
         "new_filename": "v002_03_0382",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0640"
+        },
         "text": "わかりました。"
     },
     {
         "new_voice_id": 42599,
         "new_filename": "v265_03_0007",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "イエス・サー！"
+    },
+    {
+        "new_voice_id": 42589,
+        "new_filename": "v262_03_0033",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
+        "text": "う……く……このまま逃がすものか……"
     },
     {
         "new_voice_id": 42448,
         "new_filename": "v013_03_0006",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "心当たりがあるのなら教えて頂きたいものですが……"
     },
     {
         "new_voice_id": 42447,
         "new_filename": "v013_03_0005",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "カシウス・ブライトの行方は我々も捜しているのですがいまだ突き止められなくてね。"
     },
     {
         "new_voice_id": 42446,
         "new_filename": "v013_03_0004",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "おお、そういえば博士は彼と交友があったのでしたね。"
     },
     {
         "new_voice_id": 42445,
         "new_filename": "v010_03_0104",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "たしか貴様もカシウスの元部下だったか？"
     },
     {
         "new_voice_id": 42444,
         "new_filename": "v010_03_0103",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "情報部司令、リシャール大佐……"
     },
     {
         "new_voice_id": 42443,
         "new_filename": "v010_03_0102",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "ふん……やはり貴様が黒幕じゃったか。"
     },
     {
         "new_voice_id": 42442,
         "new_filename": "v013_03_0003",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "情報部を代表して感謝しますよ。"
     },
     {
         "new_voice_id": 42441,
         "new_filename": "v013_03_0002",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "よくぞ、この《ゴスペル》の制御方法を突き止めてくださった。"
     },
     {
         "new_voice_id": 42440,
         "new_filename": "v013_03_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "130",
+            "category": "main",
+            "number": "0103"
+        },
         "text": "ラッセル博士。本当にありがとうございました。"
     },
     {
-        "new_voice_id": 42439,
-        "new_filename": "v001_03_0591",
-        "text": "え……"
+        "new_voice_id": 42157,
+        "new_filename": "v001_03_0546",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "002",
+            "category": "main",
+            "number": "0346"
+        },
+        "text": "うわ～、高いわね。"
     },
     {
-        "new_voice_id": 42099,
-        "new_filename": "v126_03_0109",
-        "text": "女神（エイドス）の加護を。くれぐれも気を付けて。"
+        "new_voice_id": 41869,
+        "new_filename": "v002_03_0285",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "127",
+            "category": "main",
+            "number": "0080"
+        },
+        "text": "（場合によったら……  工房長も呼んだ方がよさそうだ。）"
     },
     {
-        "new_voice_id": 41736,
-        "new_filename": "v002_03_0250",
-        "text": "了解しました。"
+        "new_voice_id": 40758,
+        "new_filename": "v103_03_0025",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "103",
+            "category": "main",
+            "number": "0026"
+        },
+        "text": "え～、まだ写真撮りたいのに～。"
     },
     {
-        "new_voice_id": 41190,
-        "new_filename": "v007_03_0206",
-        "text": "…………………………"
+        "new_voice_id": 40757,
+        "new_filename": "v103_03_0024",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "103",
+            "category": "main",
+            "number": "0026"
+        },
+        "text": "痛いの痛いの、とんでけー。"
+    },
+    {
+        "new_voice_id": 40756,
+        "new_filename": "v103_03_0023",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "103",
+            "category": "main",
+            "number": "0026"
+        },
+        "text": "大丈夫～、エステルちゃん？"
+    },
+    {
+        "new_voice_id": 40721,
+        "new_filename": "v129_03_0004",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "129",
+            "category": "main",
+            "number": "0005"
+        },
+        "text": "は～、アンタって子は本当に健気でいい子だねぇ。"
+    },
+    {
+        "new_voice_id": 40704,
+        "new_filename": "v001_03_0173",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "129",
+            "category": "main",
+            "number": "0005"
+        },
+        "text": "へぇ～、ここがエルモか。ずいぶん雰囲気のいいとこねぇ。"
+    },
+    {
+        "new_voice_id": 40703,
+        "new_filename": "v128_03_0017",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "129",
+            "category": "main",
+            "number": "0005"
+        },
+        "text": "おお。爺さんによろしくな。"
+    },
+    {
+        "new_voice_id": 40690,
+        "new_filename": "v128_03_0004",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "128",
+            "category": "main",
+            "number": "0005"
+        },
+        "text": "なんだよ、俺に用なのか？"
+    },
+    {
+        "new_voice_id": 40686,
+        "new_filename": "v007_03_0115",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "128",
+            "category": "main",
+            "number": "0001"
+        },
+        "text": "あう、恥ずかしながら……"
     },
     {
         "new_voice_id": 40641,
         "new_filename": "v330_03_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0172"
+        },
         "text": "何が起きたんだ！？"
+    },
+    {
+        "new_voice_id": 40438,
+        "new_filename": "v127_03_0009",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "127",
+            "category": "main",
+            "number": "0010"
+        },
+        "text": "その恩人のお子さんたちが、わざわざ訪ねてきてくれたんだ。"
+    },
+    {
+        "new_voice_id": 40430,
+        "new_filename": "v127_03_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "127",
+            "category": "main",
+            "number": "0002"
+        },
+        "text": "やあ、待っていたよ。エステル君とヨシュア君だね。"
+    },
+    {
+        "new_voice_id": 40429,
+        "new_filename": "v126_03_0028",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "127",
+            "category": "main",
+            "number": "0002"
+        },
+        "text": "何か事件が起こった時に働いて返してもらうから。"
+    },
+    {
+        "new_voice_id": 40428,
+        "new_filename": "v126_03_0027",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "127",
+            "category": "main",
+            "number": "0002"
+        },
+        "text": "気にすることはないわ。"
+    },
+    {
+        "new_voice_id": 40426,
+        "new_filename": "v126_03_0025",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "126",
+            "category": "main",
+            "number": "0026"
+        },
+        "text": "あなたたち遊撃士のサポートが私の仕事だから。"
+    },
+    {
+        "new_voice_id": 40420,
+        "new_filename": "v126_03_0019",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "126",
+            "category": "main",
+            "number": "0020"
+        },
+        "text": "だけど別の問題については手がかりをあげられると思う。"
+    },
+    {
+        "new_voice_id": 40416,
+        "new_filename": "v126_03_0015",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "126",
+            "category": "main",
+            "number": "0020"
+        },
+        "text": "カシウスさんのことね。"
+    },
+    {
+        "new_voice_id": 40407,
+        "new_filename": "v126_03_0006",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "126",
+            "category": "main",
+            "number": "0007"
+        },
+        "text": "まさに、あなたたちのことね。"
+    },
+    {
+        "new_voice_id": 40342,
+        "new_filename": "v001_03_0096",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0097"
+        },
+        "text": "ス、ストップ！"
+    },
+    {
+        "new_voice_id": 40207,
+        "new_filename": "v006_03_0051",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "007",
+            "category": "main",
+            "number": "0001"
+        },
+        "text": "（おふたりに負けないよう……  私、精いっぱい頑張りますね。）"
     },
     {
         "new_voice_id": 39001,
         "new_filename": "v114_02_9000",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "119",
+            "category": "main",
+            "number": "9000"
+        },
         "text": "んぐっ……！"
     },
     {
         "new_voice_id": 38510,
         "new_filename": "v006_02_0389",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "118",
+            "category": "main",
+            "number": "0164"
+        },
         "text": "こちらの方が小型な分、船体は軽いみたいですね。"
     },
     {
         "new_voice_id": 38509,
         "new_filename": "v001_02_0513",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "118",
+            "category": "main",
+            "number": "0164"
+        },
         "text": "よーし、近づいてきた！"
     },
     {
-        "new_voice_id": 38499,
-        "new_filename": "v001_02_0510",
-        "text": "あ、あれは……"
+        "new_voice_id": 38049,
+        "new_filename": "v005_02_0105",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0479"
+        },
+        "text": "こ、こらガキども、待ちやがれ！"
     },
     {
-        "new_voice_id": 38316,
-        "new_filename": "v118_02_0089",
-        "text": "！！！"
+        "new_voice_id": 37545,
+        "new_filename": "v001_02_0331",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0332"
+        },
+        "text": "うっわ～……めちゃめちゃ人がいる～。"
     },
     {
-        "new_voice_id": 37986,
-        "new_filename": "v114_02_0095",
-        "text": "あ……"
+        "new_voice_id": 37534,
+        "new_filename": "v001_02_0327",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0332"
+        },
+        "text": "ヨシュア～っ！"
     },
     {
-        "new_voice_id": 37588,
-        "new_filename": "v227_02_0006",
-        "text": "はあ～、どちらも素敵ですわ❤"
+        "new_voice_id": 37532,
+        "new_filename": "v002_02_0183",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "002",
+            "category": "main",
+            "number": "0184"
+        },
+        "text": "おかしいな……確かに気配があったはずなのに……"
     },
     {
-        "new_voice_id": 37088,
-        "new_filename": "v001_02_0196",
-        "text": "それじゃ、レッツ・ゴー！"
+        "new_voice_id": 37114,
+        "new_filename": "v123_02_0011",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "123",
+            "category": "main",
+            "number": "0018"
+        },
+        "text": "エステル君、ヨシュア君。どうかよろしくお願いする。"
     },
     {
-        "new_voice_id": 36944,
-        "new_filename": "v225_02_0001",
-        "text": "ウイーッス！"
+        "new_voice_id": 37105,
+        "new_filename": "v123_02_0002",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "123",
+            "category": "main",
+            "number": "0003"
+        },
+        "text": "おや、そちらの君たちは……"
+    },
+    {
+        "new_voice_id": 36651,
+        "new_filename": "v102_02_0012",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "224",
+            "category": "main",
+            "number": "0002"
+        },
+        "text": "地下１階の奥の部屋だ。遠慮せずに付いて来いよ。"
+    },
+    {
+        "new_voice_id": 36640,
+        "new_filename": "v102_02_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0002"
+        },
+        "text": "よ、なんか困ってるみたいだな？"
     },
     {
         "new_voice_id": 36614,
         "new_filename": "v138_02_0020",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "138",
+            "category": "main",
+            "number": "0021"
+        },
         "text": "フフフ……驚きのあまり声もないようだな。"
+    },
+    {
+        "new_voice_id": 36591,
+        "new_filename": "v112_02_0039",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "138",
+            "category": "main",
+            "number": "0001"
+        },
+        "text": "ああ、よろしく頼むよ！"
+    },
+    {
+        "new_voice_id": 36430,
+        "new_filename": "v134_02_0013",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "112",
+            "category": "main",
+            "number": "0001"
+        },
+        "text": "ああ、楽しんでおいで。"
+    },
+    {
+        "new_voice_id": 36403,
+        "new_filename": "v001_02_0121",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "134",
+            "category": "main",
+            "number": "0001"
+        },
+        "text": "うわ～……ここがルーアンか。"
     },
     {
         "new_voice_id": 36079,
         "new_filename": "v005_02_0002",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "005",
+            "category": "main",
+            "number": "0003"
+        },
         "text": "いや、せっかくだがさっき食っちまったばかりだ。"
     },
     {
         "new_voice_id": 35011,
         "new_filename": "v110_01_9000",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "109",
+            "category": "main",
+            "number": "9000"
+        },
         "text": "……ヤツらからの報告だと……"
     },
     {
         "new_voice_id": 35001,
         "new_filename": "v013_01_0024b",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "004",
+            "category": "main",
+            "number": "1007"
+        },
         "text": "いい記事は書けそうかな？"
     },
     {
-        "new_voice_id": 34446,
-        "new_filename": "v210_01_0008",
-        "text": "お、お前たちは！？"
+        "new_voice_id": 34982,
+        "new_filename": "v002_01_0288",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "004",
+            "category": "main",
+            "number": "1007"
+        },
+        "text": "２人ともお元気で！"
     },
     {
         "new_voice_id": 34330,
         "new_filename": "v214_01_0002",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "004",
+            "category": "main",
+            "number": "0176"
+        },
         "text": "がってんだ！"
     },
     {
-        "new_voice_id": 34078,
-        "new_filename": "v002_01_0153",
-        "text": "…………………………"
+        "new_voice_id": 34274,
+        "new_filename": "v003_01_0191",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "002",
+            "category": "main",
+            "number": "0200"
+        },
+        "text": "（彼らの話が終わるまでに  街道に出て空賊艇を探すわよ。）"
+    },
+    {
+        "new_voice_id": 34058,
+        "new_filename": "v013_01_0023",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0306"
+        },
+        "text": "何かあったら連絡してくれたまえ。"
     },
     {
         "new_voice_id": 33693,
         "new_filename": "v211_01_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0195"
+        },
         "text": "がってんだ、キール兄貴。"
     },
     {
         "new_voice_id": 33692,
         "new_filename": "v210_01_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0195"
+        },
         "text": "がってんだ、キール兄貴。"
     },
     {
-        "new_voice_id": 33111,
-        "new_filename": "v002_01_0027",
-        "text": "あ、うん……"
+        "new_voice_id": 33607,
+        "new_filename": "v103_01_0007",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "209",
+            "category": "main",
+            "number": "0001"
+        },
+        "text": "セ、センパーイ！待ってくださいよ～！"
+    },
+    {
+        "new_voice_id": 33269,
+        "new_filename": "v105_01_0025",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "105",
+            "category": "main",
+            "number": "0026"
+        },
+        "text": "その通りじゃ。"
+    },
+    {
+        "new_voice_id": 33264,
+        "new_filename": "v105_01_0020",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "105",
+            "category": "main",
+            "number": "0021"
+        },
+        "text": "うむ、いいじゃろう。"
+    },
+    {
+        "new_voice_id": 33256,
+        "new_filename": "v105_01_0012",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "105",
+            "category": "main",
+            "number": "0013"
+        },
+        "text": "残念ながらその通りじゃ。"
+    },
+    {
+        "new_voice_id": 33249,
+        "new_filename": "v105_01_0005",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "105",
+            "category": "main",
+            "number": "0006"
+        },
+        "text": "わしはボース支部を預かるルグランというジジイじゃ。"
+    },
+    {
+        "new_voice_id": 33245,
+        "new_filename": "v105_01_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "105",
+            "category": "main",
+            "number": "0002"
+        },
+        "text": "おお、シェラザード。思ったよりも早く着いたな。"
+    },
+    {
+        "new_voice_id": 33221,
+        "new_filename": "v135_01_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "135",
+            "category": "main",
+            "number": "0005"
+        },
+        "text": "よう！シェラザードじゃないか。"
+    },
+    {
+        "new_voice_id": 33001,
+        "new_filename": "v002_01_0001",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0041"
+        },
+        "text": "……………………"
     },
     {
         "new_voice_id": 32007,
         "new_filename": "v001_00_9002",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "327",
+            "category": "main",
+            "number": "9002"
+        },
         "text": "あ、確かに。いい感じにリラックスできそう♪"
     },
     {
         "new_voice_id": 32006,
         "new_filename": "v002_00_9000",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "327",
+            "category": "main",
+            "number": "9002"
+        },
         "text": "まだ時間もあるし、町のみんなに挨拶してもよさそうだけど。"
     },
     {
         "new_voice_id": 32002,
         "new_filename": "v016_00_0026b",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "327",
+            "category": "main",
+            "number": "9002"
+        },
         "text": "……僕の名前は………"
     },
     {
         "new_voice_id": 32001,
         "new_filename": "v015_00_0005b",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "327",
+            "category": "main",
+            "number": "9002"
+        },
         "text": "ゴハンの前にもういちど棒術の練習でもしよっかな。"
-    },
-    {
-        "new_voice_id": 31844,
-        "new_filename": "v002_00_0345",
-        "text": "まあ、いいじゃない。七耀石も取り戻せたんだし。"
     },
     {
         "new_voice_id": 31821,
         "new_filename": "v003_00_0152",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "109",
+            "category": "main",
+            "number": "0054"
+        },
         "text": "はっ！？"
+    },
+    {
+        "new_voice_id": 31531,
+        "new_filename": "v011_00_0045",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0530"
+        },
+        "text": "いいじゃないですか。仲良きことは美しきかな、ですよ。"
     },
     {
         "new_voice_id": 31530,
         "new_filename": "v011_00_0044",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0530"
+        },
         "text": "フフ……"
+    },
+    {
+        "new_voice_id": 31529,
+        "new_filename": "v011_00_0043",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0530"
+        },
+        "text": "なるほど。それが、先程の少年ですか。"
+    },
+    {
+        "new_voice_id": 31528,
+        "new_filename": "v011_00_0042",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0530"
+        },
+        "text": "申しわけない……立ち入った事を聞きましたね。"
+    },
+    {
+        "new_voice_id": 31527,
+        "new_filename": "v011_00_0041",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0530"
+        },
+        "text": "……誰か大切な方を？"
+    },
+    {
+        "new_voice_id": 31525,
+        "new_filename": "v011_00_0039",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "011",
+            "category": "main",
+            "number": "0040"
+        },
+        "text": "ええ、北方の生まれです。"
+    },
+    {
+        "new_voice_id": 31511,
+        "new_filename": "v103_00_0047",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "103",
+            "category": "main",
+            "number": "0048"
+        },
+        "text": "エッヘン❤"
+    },
+    {
+        "new_voice_id": 31510,
+        "new_filename": "v103_00_0046",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "103",
+            "category": "main",
+            "number": "0048"
+        },
+        "text": "これに光を焼き付けることで写真が撮れるっていう仕組みなの。"
     },
     {
         "new_voice_id": 31509,
         "new_filename": "v103_00_0045",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "103",
+            "category": "main",
+            "number": "0048"
+        },
         "text": "七耀石を加工した極薄の結晶回路（クオーツ）でね。"
     },
     {
-        "new_voice_id": 31490,
-        "new_filename": "v002_00_0301",
-        "text": "了解。"
+        "new_voice_id": 31508,
+        "new_filename": "v103_00_0044",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "103",
+            "category": "main",
+            "number": "0048"
+        },
+        "text": "感光クオーツの数が足りるか心配になってきちゃったよ～。"
     },
     {
-        "new_voice_id": 31165,
-        "new_filename": "v109_00_0014",
-        "text": "まあ……！それは七耀石ですわね。"
+        "new_voice_id": 31501,
+        "new_filename": "v102_00_0101",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0105"
+        },
+        "text": "だが、エレボニア帝国による偽装工作というセンもありえる。"
+    },
+    {
+        "new_voice_id": 31500,
+        "new_filename": "v102_00_0100",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0105"
+        },
+        "text": "その可能性が高いな。"
+    },
+    {
+        "new_voice_id": 31493,
+        "new_filename": "v102_00_0093",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0094"
+        },
+        "text": "たまには悪くないかもしれん。"
+    },
+    {
+        "new_voice_id": 31310,
+        "new_filename": "v102_00_0040",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0041"
+        },
+        "text": "仕方ねぇ……経費で落とさせてもらうぜ。"
+    },
+    {
+        "new_voice_id": 31299,
+        "new_filename": "v001_00_0459",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0041"
+        },
+        "text": "な～んか揉めてるわね。"
+    },
+    {
+        "new_voice_id": 31048,
+        "new_filename": "v104_00_0006",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "102",
+            "category": "main",
+            "number": "0001"
+        },
+        "text": "詳しい話は書斎でさせてもらうよ。"
     },
     {
         "new_voice_id": 30854,
         "new_filename": "v206_00_0011",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "002",
+            "category": "main",
+            "number": "0204"
+        },
         "text": "そろそろ戻ってくると思うわ。"
+    },
+    {
+        "new_voice_id": 30491,
+        "new_filename": "v001_00_0158",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0159"
+        },
+        "text": "やっぱり入ってたか……"
     },
     {
         "new_voice_id": 30490,
         "new_filename": "v201_00_0014",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0159"
+        },
         "text": "……まだ最初の階じゃないか………"
     },
     {
         "new_voice_id": 30489,
         "new_filename": "v201_00_0013",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0159"
+        },
         "text": "…そんなに恐がるなよ～！"
     },
     {
         "new_voice_id": 30488,
         "new_filename": "v202_00_0007",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0159"
+        },
         "text": "……こわいよ～っ……"
     },
     {
         "new_voice_id": 30487,
         "new_filename": "v202_00_0006",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0159"
+        },
         "text": "く、暗いよ～っ……"
     },
     {
         "new_voice_id": 30319,
         "new_filename": "v001_00_0090",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0091"
+        },
         "text": "試験の仕上げってわけね──了解よ！"
     },
     {
         "new_voice_id": 30318,
         "new_filename": "v002_00_0053",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0091"
+        },
         "text": "勝機を窺いつつ、二人で一気に畳みかけよう。"
     },
     {
         "new_voice_id": 30317,
         "new_filename": "v002_00_0052",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0091"
+        },
         "text": "地下水路を縄張りにしている魔獣の親玉みたいだね。"
     },
     {
         "new_voice_id": 30316,
         "new_filename": "v001_00_0089",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0091"
+        },
         "text": "……何やら大きいのが居座ってるけど。"
     },
     {
         "new_voice_id": 30315,
         "new_filename": "v001_00_0088",
+        "classification": {
+            "type": "character_voice",
+            "character_id": "001",
+            "category": "main",
+            "number": "0091"
+        },
         "text": "行き止まり、か。ということはあれが目的の宝箱ね。"
     }
 ]

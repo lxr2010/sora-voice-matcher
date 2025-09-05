@@ -11,8 +11,8 @@
 --- 匹配完成 ---
 总计 (输入文件): 17274
 处理 (符合条件): 13686
-成功: 13594 (其中向量搜索: 405)
-失败: 92
+成功: 13513 (其中向量搜索: 628)
+失败: 173
 ```
 
 ## 目录介绍
@@ -163,6 +163,7 @@ uv run match_voices.py --match-battle --match-active
 -   `new_filename`: 重制版语音的文件名（不含扩展名）。
 -   `new_text`: 重制版语音的对应文本。
 -   `old_voice_id`: 匹配到的Evo版语音文件的ID。
+-   `old_script_id`: 匹配到的Evo版语音的脚本ID。
 -   `old_text`: 匹配到的Evo版语音的对应文本。
 -   `character_id`: 角色ID。
 -   `source_file`: Evo版语音来源的脚本文件名。
@@ -226,18 +227,29 @@ uv run match_voices.py --match-battle --match-active
 
 这是最后一步，此脚本将整合所有匹配结果和语音文件，生成可直接用于游戏的 `.pac` 文件。
 
-运行 `package_assets.ps1` 脚本：
+运行 `package_assets.ps1` 脚本。默认情况下，该脚本会处理 `table_sc`（语音表）。您可以选择性地包含语音文件的打包。
 
-```powershell
-./package_assets.ps1
-```
+**打包选项:**
 
-此脚本会自动执行以下操作：
+-   **仅打包语音表 (默认)**:
+    ```powershell
+    ./package_assets.ps1
+    ```
+    此命令仅会生成 `table_sc.pac`。
+
+-   **打包语音表和语音文件**:
+    ```powershell
+    ./package_assets.ps1 -IncludeVoice
+    ```
+    此命令会同时生成 `table_sc.pac` 和 `voice.pac`。
+
+**脚本会自动执行以下操作：**
 1.  将 `output/t_voice.json` 转换为 `t_voice.tbl`。
 2.  准备一个临时打包环境，并复制原始游戏资源。
-3.  使用新的 `t_voice.tbl` 替换旧表，并合并所有新的 `.wav` 语音文件。
-4.  重新打包生成 `voice.pac` 和 `table_sc.pac`。
-5.  将最终的 `.pac` 文件存放到 `output` 目录下。
+3.  使用新的 `t_voice.tbl` 替换旧表。
+4.  如果使用 `-IncludeVoice`，则合并所有新的 `.wav` 语音文件。
+5.  重新打包生成 `table_sc.pac` (默认) 和 `voice.pac` (可选)。
+6.  将最终的 `.pac` 文件存放到 `output` 目录下。
 
 ### 步骤 6: 应用或恢复补丁
 
@@ -280,6 +292,20 @@ uv run match_voices.py --match-battle --match-active
 *   `unmatched_voice_data.json`: **输出文件**。包含所有未能匹配的语音条目。
 *   `package_assets.ps1`: **打包脚本**。自动化最后一步，将所有资源打包成最终的 `voice.pac` 和 `table_sc.pac` 文件。
 *   `update_game_files.ps1`: **部署脚本**。用于将最终生成的 `.pac` 文件自动复制到游戏目录，并支持从备份中恢复原始文件。
+
+## 致谢
+
+本项目的实现离不开以下优秀的开源工具和社区的支持，在此向他们表示诚挚的感谢：
+
+- **[kuro_mdl_tool](https://github.com/eArmada8/kuro_mdl_tool)**: 提供了拆包和打包Falcom `.pac` 文件的核心功能。特别感谢其文档中提到的以下贡献者：
+    - **Julian Uy (uyjulian)**: 在MDL格式的逆向工程方面做出了基础性贡献。
+    - **TwnKey** 及 **KuroTools 团队 (nnguyen259)**: 提供了用于解密/解压资源和MDL转换器的代码。
+    - **weskeryiu** 和 **Kyuuhachi**: 为理解MDL格式和碰撞网格结构提供了深刻见解。
+    - **DarkStarSword**: 开发了功能强大的3DMigoto-Blender插件。
+- **[SoraVoiceScripts](https://github.com/ZhenjianYang/SoraVoiceScripts)**: 由 **ZhenjianYang** 提供，该仓库包含了从原始游戏中提取的关键脚本文件，是文本提取的基础。
+- **[atractool-reloaded](https://github.com/kou-yeung/atractool-reloaded)**: 提供了将 `.at9` 音频文件转换为 `.wav` 格式的工具。
+- **Kiseki modding discord 社区**: 营造了知识共享与协作的环境。
+- **[轨迹Cafe](https://wiki.biligame.com/kiseki/)**: 一个内容详尽的粉丝运营维基和社区，是轨迹系列宝贵的资源库。
 
 ## 许可协议
 
@@ -492,18 +518,29 @@ Arguments can be combined. For example, to match main, battle, and active voices
 
 This final step integrates all matching results and voice files to generate game-ready `.pac` files.
 
-Run the `package_assets.ps1` script:
+Run the `package_assets.ps1` script. By default, this script processes the `table_sc` (voice table). You can optionally include voice file packaging.
 
-```powershell
-./package_assets.ps1
-```
+**Packaging Options:**
 
-This script automates:
+-   **Package Only the Voice Table (Default)**:
+    ```powershell
+    ./package_assets.ps1
+    ```
+    This command will only generate `table_sc.pac`.
+
+-   **Package Both Voice Table and Voice Files**:
+    ```powershell
+    ./package_assets.ps1 -IncludeVoice
+    ```
+    This command will generate both `table_sc.pac` and `voice.pac`.
+
+**The script automates the following:**
 1.  Converting `output/t_voice.json` to `t_voice.tbl`.
 2.  Preparing a temporary packaging environment.
-3.  Replacing the old `t_voice.tbl` and merging the new `.wav` files.
-4.  Repackaging `voice.pac` and `table_sc.pac`.
-5.  Placing the final `.pac` files in the `output` directory.
+3.  Replacing the old `t_voice.tbl`.
+4.  If `-IncludeVoice` is used, it merges all new `.wav` voice files.
+5.  Repackaging `table_sc.pac` (by default) and `voice.pac` (optional).
+6.  Placing the final `.pac` files in the `output` directory.
 
 ### Step 6: Apply or Restore the Patch
 
@@ -566,3 +603,13 @@ This project is created for technical research and personal entertainment purpos
 ## Acknowledgements
 
 This project was made possible by the support of the following excellent open-source tools and communities. A sincere thank you to them:
+
+- **[kuro_mdl_tool](https://github.com/eArmada8/kuro_mdl_tool)**: For providing the core functionality of unpacking and repacking Falcom's `.pac` files. Special thanks to the following individuals mentioned in its credits:
+    - **Julian Uy (uyjulian)**: For the foundational reverse engineering work on the MDL format.
+    - **TwnKey** and the **KuroTools team (nnguyen259)**: For the code to decrypt/decompress assets and the MDL converter.
+    - **weskeryiu** and **Kyuuhachi**: For providing deep insights into the MDL format and collision mesh structures.
+    - **DarkStarSword**: For the invaluable 3DMigoto-Blender plugin.
+- **[SoraVoiceScripts](https://github.com/ZhenjianYang/SoraVoiceScripts)**: Provided by **ZhenjianYang**, this repository contains the essential script files from the original game, which are crucial for text extraction.
+- **[atractool-reloaded](https://github.com/kou-yeung/atractool-reloaded)**: For the tool that converts `.at9` audio files to the `.wav` format.
+- The **Kiseki modding discord community**: For fostering an environment of knowledge sharing and collaboration.
+- **[轨迹Cafe](https://wiki.biligame.com/kiseki/)**: A comprehensive fan-run wiki and community that serves as an invaluable resource for the Trails series.
