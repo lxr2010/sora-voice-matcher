@@ -688,7 +688,7 @@ def main():
                         '',
                         'skipped',
                         skipped_entry['classification']['type'],
-                        skipped_entry['classification'].get('description', ''),
+                        skipped_entry['classification'].get('character_id', ''),
                         skipped_entry['classification'].get('category', ''),
                         skipped_entry['classification'].get('number', ''),
                         skipped_entry['text'],
