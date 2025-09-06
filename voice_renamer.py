@@ -44,7 +44,8 @@ def main():
             continue
 
         if args.remake_character_ids:
-            output_dir = os.path.join(args.output, str(row['RemakeVoiceCharacterId']), 'wav')
+            character_id_str = f"{int(row['RemakeVoiceCharacterId']):03d}"
+            output_dir = os.path.join(args.output, character_id_str, 'wav')
         else:
             output_dir = os.path.join(args.output, 'all', 'wav')
 
