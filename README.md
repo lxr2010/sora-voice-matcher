@@ -287,6 +287,10 @@ uv run match_voices.py --match-battle --match-active
 *   `analyze_voice_files.py`: **工具脚本**。用于验证 `t_voice.json` 中的文件列表与磁盘上的 `.wav` 文件是否一致。
 *   `analyze_context.py`: **调试工具**。分析未匹配的语音，通过上下文帮助定位问题。
 *   `converter.py`: **工具脚本**。用于将文本文件从 Shift-JIS 编码转换为 UTF-8。
+*   `generate_id_mapping.py`: **（新增）工具脚本**。通过分析 `match_result.csv`，统计新旧角色ID之间的匹配频率，生成一个最可能的 `RemakeVoiceCharacterId` 到 `OldVoiceCharacterId` 的映射文件 `voice_id_mapping.csv`。
+*   `voice_renamer.py`: **（新增）工具脚本**。根据 `match_result.csv`，将旧的语音文件（`.wav`）重命名并复制到新目录。可用于为特定角色准备语音文件，或进行手动打包。
+    *   **使用方法**: `uv run voice_renamer.py --old-voice-wav <旧语音WAV目录> --output <输出目录> [--remake-character-ids <角色ID列表>]`
+    *   **示例**: `uv run voice_renamer.py --old-voice-wav ./voice/wav --output ./output/renamed_voices --remake-character-ids 1 2`
 *   `convert_voice.ps1`: **工具脚本**。使用 `atractool-reloaded` 将 `.at9` 音频文件转换为 `.wav`。
 *   `merged_voice_data.json`: **输出文件**。包含所有成功匹配的语音条目。
 *   `unmatched_voice_data.json`: **输出文件**。包含所有未能匹配的语音条目。
@@ -578,6 +582,10 @@ To analyze why some voices failed to match, you can run:
 *   `analyze_voice_files.py`: **Utility script**. Verifies consistency between `t_voice.json` and on-disk `.wav` files.
 *   `analyze_context.py`: **Debugging tool**. Analyzes unmatched voices using context.
 *   `converter.py`: **Utility script**. Converts text files from Shift-JIS to UTF-8.
+*   `generate_id_mapping.py`: **(New) Utility Script**. Analyzes `match_result.csv` to determine the most frequent mapping between new and old character IDs, generating a `voice_id_mapping.csv` file.
+*   `voice_renamer.py`: **(New) Utility Script**. Renames and copies old voice files (`.wav`) to a new directory based on `match_result.csv`. Useful for preparing voice files for specific characters or for manual packaging.
+    *   **Usage**: `uv run voice_renamer.py --old-voice-wav <path_to_old_wav_dir> --output <output_dir> [--remake-character-ids <list_of_ids>]`
+    *   **Example**: `uv run voice_renamer.py --old-voice-wav ./voice/wav --output ./output/renamed_voices --remake-character-ids 1 2`
 *   `convert_voice.ps1`: **Utility script**. Converts `.at9` audio files to `.wav` using `atractool-reloaded`.
 *   `merged_voice_data.json`: **Output file**. Contains all successfully matched voice entries.
 *   `unmatched_voice_data.json`: **Output file**. Contains all unmatched voice entries.
